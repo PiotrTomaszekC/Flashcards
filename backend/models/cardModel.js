@@ -16,6 +16,8 @@ const cardSchema = new mongoose.Schema(
     translation: { type: String, required: true },
     // category: { type: String, required: true },
     remember: { type: Boolean, required: true },
+    repetitions: { type: Number, default: 0 },
+    rememberedCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

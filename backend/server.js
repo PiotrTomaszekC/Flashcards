@@ -4,6 +4,7 @@ dotenv.config();
 import connectDB from "./config/db.js";
 import flashcardsRoutes from "./routes/flashcardRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import setRoutes from "./routes/setRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 import cookieParser from "cookie-parser";
 
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/flashcards", flashcardsRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/sets", setRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

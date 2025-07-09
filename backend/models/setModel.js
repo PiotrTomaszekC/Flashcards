@@ -1,5 +1,16 @@
 import mongoose from "mongoose";
 
+const languageSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  flag: {
+    type: String,
+    required: true,
+  },
+});
+
 const setSchema = new mongoose.Schema(
   {
     user: {
@@ -14,14 +25,14 @@ const setSchema = new mongoose.Schema(
     description: {
       type: String,
     },
-    // sourceLanguage: {
-    //   type: String,
-    //   required: true,
-    // },
-    // targetLanguage: {
-    //   type: String,
-    //   required: true,
-    // },
+    sourceLanguage: {
+      type: languageSchema,
+      required: true,
+    },
+    targetLanguage: {
+      type: languageSchema,
+      required: true,
+    },
   },
   { timestamps: true }
 );
