@@ -6,11 +6,13 @@ import Loader from "./Loader";
 interface ModalEditDeckProps {
   editingDeck: Deck;
   setEditingDeck: (deck: Deck | null) => void;
+  updateDecks: React.Dispatch<React.SetStateAction<Deck[]>>;
 }
 
 export default function ModalEditDeck({
   setEditingDeck,
   editingDeck,
+  updateDecks,
 }: ModalEditDeckProps) {
   const [editName, setEditName] = useState(editingDeck.name);
   const [editDescription, setEditDescription] = useState(
@@ -21,11 +23,21 @@ export default function ModalEditDeck({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    await axios.put(`/api/sets/${editingDeck._id}`, {
-      name: editName,
-      description: editDescription,
-    });
+    const { data: updatedDeck } = await axios.put(
+      `/api/sets/${editingDeck._id}`,
+      {
+        name: editName,
+        description: editDescription,
+      }
+    );
     setIsLoading(false);
+
+    updateDecks((prevDecks) =>
+      prevDecks.map((deck) =>
+        deck._id === updatedDeck._id ? updatedDeck : deck
+      )
+    );
+
     setEditingDeck(null);
   };
 

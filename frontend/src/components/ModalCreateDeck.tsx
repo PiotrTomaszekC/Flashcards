@@ -1,9 +1,11 @@
 import axios from "axios";
 import { useState } from "react";
 import Loader from "./Loader";
+import type { Deck } from "../types";
 
 interface ModalCreateDeckProps {
   setIsCreatingDeck: (value: boolean) => void;
+  updateDecks: React.Dispatch<React.SetStateAction<Deck[]>>;
 }
 
 const languages = [
@@ -16,6 +18,7 @@ const languages = [
 
 export default function ModalCreateDeck({
   setIsCreatingDeck,
+  updateDecks,
 }: ModalCreateDeckProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
@@ -26,13 +29,14 @@ export default function ModalCreateDeck({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    await axios.post("/api/sets", {
+    const { data: newDeck } = await axios.post("/api/sets", {
       name,
       description,
       sourceLanguage,
       targetLanguage,
     });
     setIsLoading(false);
+    updateDecks((prevDecks) => [...prevDecks, newDeck]);
     setIsCreatingDeck(false);
   };
 

@@ -73,7 +73,15 @@ const editSet = asyncHandler(async (req, res) => {
 //@route DELETE /api/sets/:id
 //@access Private
 const deleteSet = asyncHandler(async (req, res) => {
-  res.send("Delete set");
+  const set = await Set.findById(req.params.id);
+
+  if (set) {
+    await Set.deleteOne({ _id: set._id });
+    res.status(200).json({ message: "Product deleted" });
+  } else {
+    res.status(404);
+    throw new Error("Set not found");
+  }
 });
 
 export { getMySets, getSetById, addSet, editSet, deleteSet };

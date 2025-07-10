@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import ModalEditDeck from "../components/ModalEditDeck";
 import type { Deck } from "../types";
 import ModalCreateDeck from "../components/ModalCreateDeck";
+import { toast } from "react-toastify";
 
 export default function AllDecksScreen() {
   const [decks, setDecks] = useState<Deck[]>([]);
@@ -16,9 +17,19 @@ export default function AllDecksScreen() {
       const { data } = await axios.get("/api/sets");
       setDecks(data);
     };
-
     fetchDecks();
-  });
+  }, []);
+
+  async function handleDelete(deckId: string) {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this deck?"
+    );
+    if (confirmed) {
+      await axios.delete(`/api/sets/${deckId}`);
+      toast.success("Deck deleted");
+      setDecks((prev) => prev.filter((deck) => deck._id !== deckId));
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -38,26 +49,32 @@ export default function AllDecksScreen() {
             key={deck._id}
             className="bg-blue-100 rounded-md p-4 transform transition-transform duration-300 hover:scale-105"
           >
-            <h3 className="text-center font-semibold text-2xl">{deck.name}</h3>
+            <h3 className="text-center font-semibold text-2xl mb-2">
+              {deck.name}
+            </h3>
 
             <p className="text-center text-lg mb-2">
-              {deck.sourceLanguage.flag}
-              {deck.sourceLanguage.name} → {deck.targetLanguage.flag}
-              {deck.targetLanguage.name}{" "}
+              <span className="mr-2">{deck.sourceLanguage.flag}</span>
+              {deck.sourceLanguage.name} →
+              <span className="ml-2 mr-2">{deck.targetLanguage.flag}</span>
+              {deck.targetLanguage.name}
             </p>
 
-            <p className="text-center ">{deck.description}</p>
+            <p className="text-center text-lg mb-2">{deck.description}</p>
 
-            <div className="flex justify-end gap-2 mt-2">
+            <div className="flex justify-end gap-2">
               <button
-                className=" bg-transparent hover:bg-blue-200 p-2 rounded transition-colors"
+                className="bg-transparent hover:bg-blue-200 p-2 rounded transition-colors"
                 onClick={() => {
                   setEditingDeck(deck);
                 }}
               >
                 <FaEdit />
               </button>
-              <button className=" bg-transparent hover:bg-blue-200 p-2 rounded transition-colors">
+              <button
+                className=" bg-transparent hover:bg-blue-200 p-2 rounded transition-colors"
+                onClick={() => handleDelete(deck._id)}
+              >
                 <FaTrash />
               </button>
               <Link
@@ -74,10 +91,14 @@ export default function AllDecksScreen() {
         <ModalEditDeck
           editingDeck={editingDeck}
           setEditingDeck={setEditingDeck}
+          updateDecks={setDecks}
         />
       )}
       {isCreatingDeck && (
-        <ModalCreateDeck setIsCreatingDeck={setIsCreatingDeck} />
+        <ModalCreateDeck
+          setIsCreatingDeck={setIsCreatingDeck}
+          updateDecks={setDecks}
+        />
       )}
     </div>
   );
