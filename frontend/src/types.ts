@@ -6,6 +6,7 @@ export interface Flashcard {
   remember: boolean;
   repetitions: number;
   rememberedCount: number;
+  updatedAt?: string;
 }
 
 export interface Language {

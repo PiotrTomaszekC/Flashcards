@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import type { Deck } from "../types";
 import axios from "axios";
 import Loader from "../components/Loader";
@@ -21,7 +21,8 @@ export default function DeckScreen() {
         const { data: flashcardsData } = await axios.get(
           `/api/flashcards?setId=${id}`
         );
-        setFlashcards(flashcardsData);
+        const shuffled = [...flashcardsData].sort(() => Math.random() - 0.5);
+        setFlashcards(shuffled);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -49,17 +50,30 @@ export default function DeckScreen() {
   }
 
   return (
-    <div className="flex flex-col items-center h-screen">
-      <h1 className="uppercase text-4xl font-semibold text-center">
-        {deck.name} ({deck.sourceLanguage.flag} → {deck.targetLanguage.flag}){" "}
-      </h1>
+    <div className="flex flex-col h-screen">
+      <div className="sm:relative flex max-sm:flex-col max-sm:gap-3 justify-center items-center">
+        <h1 className="uppercase text-4xl font-semibold">
+          {deck.name} ({deck.sourceLanguage.flag} → {deck.targetLanguage.flag})
+        </h1>
+        <Link
+          to={`/addCard?deck=${id}`}
+          className="sm:absolute sm:right-0 bg-green-500 hover:bg-green-600 text-white transition-colors font-semibold px-4 py-2 rounded text-xl cursor-pointer"
+        >
+          + Add Flashcard
+        </Link>
+      </div>
 
       {flashcards.length === 0 ? (
         <p className="text-center text-gray-500 text-lg mt-20">
           No flashcards in this set yet.
         </p>
       ) : (
-        <FlashcardComponent flashcards={flashcards} />
+        <div className="flex justify-center mt-10 w-full h-full">
+          <FlashcardComponent
+            flashcards={flashcards}
+            setFlashcards={setFlashcards}
+          />
+        </div>
       )}
     </div>
   );

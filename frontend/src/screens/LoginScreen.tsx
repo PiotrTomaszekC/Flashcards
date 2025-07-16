@@ -57,10 +57,10 @@ export default function LoginScreen() {
       <div className="flex flex-col gap-4 items-center">
         <h2 className="uppercase text-4xl font-semibold">Login</h2>
         <form
-          className="w-1/3 p-6 bg-white shadow-md rounded flex flex-col items-center justify-center text-2xl gap-10"
+          className="w-full sm:w-[70%] lg:w-1/3 p-6 bg-white shadow-md rounded flex flex-col items-center justify-center text-2xl gap-10"
           onSubmit={handleSubmit}
         >
-          <div className="flex flex-col items-center gap-3 w-2/3">
+          <div className="flex flex-col items-center gap-3 w-full lg:w-2/3">
             <label htmlFor="email">Email</label>{" "}
             <input
               type="email"
@@ -72,7 +72,7 @@ export default function LoginScreen() {
             />
           </div>
 
-          <div className="flex flex-col items-center gap-3 w-2/3">
+          <div className="flex flex-col items-center gap-3 w-full lg:w-2/3">
             <label htmlFor="password">Password</label>{" "}
             <input
               type="password"
@@ -89,7 +89,7 @@ export default function LoginScreen() {
             ) : (
               <button
                 type="submit"
-                className="bg-blue-600 py-2 px-5 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors"
+                className="bg-blue-600 py-2 px-5 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors cursor-pointer"
               >
                 Log in
               </button>

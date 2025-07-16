@@ -16,17 +16,20 @@ import LoginScreen from "./screens/LoginScreen.tsx";
 import RegisterScreen from "./screens/RegisterScreen.tsx";
 import AllDecksScreen from "./screens/AllDecksScreen.tsx";
 import DeckScreen from "./screens/DeckScreen.tsx";
+import PrivateRoute from "./components/PrivateRoute.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       <Route index={true} path="/" element={<HomeScreen />} />
-      <Route path="/decks" element={<AllDecksScreen />} />
-      <Route path="/decks/:id" element={<DeckScreen />} />
-      <Route path="/addCard" element={<AddCardScreen />} />
-      <Route path="/learn" element={<LearnSreen />} />
       <Route path="/login" element={<LoginScreen />} />
       <Route path="/register" element={<RegisterScreen />} />
+      <Route path="" element={<PrivateRoute />}>
+        <Route path="/decks" element={<AllDecksScreen />} />
+        <Route path="/decks/:id" element={<DeckScreen />} />
+        <Route path="/addCard" element={<AddCardScreen />} />
+        <Route path="/learn" element={<LearnSreen />} />
+      </Route>
     </Route>
   )
 );

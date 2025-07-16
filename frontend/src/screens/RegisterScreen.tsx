@@ -62,10 +62,10 @@ export default function RegisterScreen() {
       <div className="flex flex-col gap-4 items-center">
         <h2 className="uppercase text-4xl font-semibold">Register new user</h2>
         <form
-          className="w-1/3 p-6 bg-white shadow-md rounded flex flex-col items-center justify-center text-2xl gap-10"
+          className="w-full sm:w-[70%] lg:w-1/3 p-6 bg-white shadow-md rounded flex flex-col items-center justify-center text-2xl gap-10"
           onSubmit={handleSubmit}
         >
-          <div className="flex flex-col items-center gap-3 w-2/3">
+          <div className="flex flex-col items-center gap-3 w-full lg:w-2/3">
             <label htmlFor="name">Name</label>{" "}
             <input
               type="text"
@@ -77,7 +77,7 @@ export default function RegisterScreen() {
             />
           </div>
 
-          <div className="flex flex-col items-center gap-3 w-2/3">
+          <div className="flex flex-col items-center gap-3 w-full lg:w-2/3">
             <label htmlFor="email">Email</label>{" "}
             <input
               type="email"
@@ -89,7 +89,7 @@ export default function RegisterScreen() {
             />
           </div>
 
-          <div className="flex flex-col items-center gap-3 w-2/3">
+          <div className="flex flex-col items-center gap-3 w-full lg:w-2/3">
             <label htmlFor="password">Password</label>{" "}
             <input
               type="password"
@@ -101,7 +101,7 @@ export default function RegisterScreen() {
             />
           </div>
 
-          <div className="flex flex-col items-center gap-3 w-2/3">
+          <div className="flex flex-col items-center gap-3 w-full lg:w-2/3">
             <label htmlFor="confirmPassword">Confirm Password</label>{" "}
             <input
               type="password"

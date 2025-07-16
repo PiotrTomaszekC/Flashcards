@@ -1,4 +1,5 @@
 import asyncHandler from "../middleware/asyncHandler.js";
+import Card from "../models/cardModel.js";
 import Set from "../models/setModel.js";
 
 //@desc Get logged in user sets
@@ -76,8 +77,9 @@ const deleteSet = asyncHandler(async (req, res) => {
   const set = await Set.findById(req.params.id);
 
   if (set) {
+    await Card.deleteMany({ set: set._id });
     await Set.deleteOne({ _id: set._id });
-    res.status(200).json({ message: "Product deleted" });
+    res.status(200).json({ message: "Set and associated flashcards deleted" });
   } else {
     res.status(404);
     throw new Error("Set not found");

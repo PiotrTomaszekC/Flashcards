@@ -1,10 +1,13 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useState } from "react";
+import { FaUser } from "react-icons/fa";
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   async function handleLogout() {
     const confirmed = window.confirm("Are you sure you want to log out?");
@@ -18,57 +21,36 @@ export default function Header() {
 
   return (
     <header className="py-4 text-4xl bg-white px-6 flex justify-between items-center">
-      <div className="flex items-center gap-20">
-        <div className="font-bold text-blue-600">Flashcards</div>
-        <nav className="flex gap-10 text-xl uppercase">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              isActive
-                ? "text-blue-600 hover:underline"
-                : "hover:text-blue-500 hover:underline"
-            }
-          >
-            Home
-          </NavLink>
-          <NavLink
-            to="/decks"
-            className={({ isActive }) =>
-              isActive
-                ? "text-blue-600 hover:underline"
-                : "hover:text-blue-500 hover:underline"
-            }
-          >
-            My Decks
-          </NavLink>
-          <NavLink
-            to="/addCard"
-            className={({ isActive }) =>
-              isActive
-                ? "text-blue-600 hover:underline"
-                : "hover:text-blue-500 hover:underline"
-            }
-          >
-            + Add Card
-          </NavLink>
-          <NavLink
-            to="/learn"
-            className={({ isActive }) =>
-              isActive
-                ? "text-blue-600 hover:underline"
-                : "hover:text-blue-500 hover:underline"
-            }
-          >
-            Learn
-          </NavLink>
+      <div className="flex items-center gap-10">
+        <Link to="/" className="font-bold text-blue-600">
+          Flashcards
+        </Link>
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex gap-10 text-xl uppercase items-center">
+          {["/", "/decks", "/addCard", "/learn"].map((path, idx) => (
+            <NavLink
+              key={idx}
+              to={path}
+              className={({ isActive }) =>
+                isActive
+                  ? "text-blue-600 hover:underline max-lg:text-center"
+                  : "hover:text-blue-500 hover:underline max-lg:text-center"
+              }
+            >
+              {["Home", "My Decks", "Add Card", "Learn"][idx]}
+            </NavLink>
+          ))}
         </nav>
       </div>
-      <div className="text-xl mr-20">
+
+      {/* Auth Buttons */}
+
+      <div className="text-xl hidden md:block ml-10">
         {user ? (
-          <div className="flex gap-5 items-center">
+          <div className="flex gap-5 items-center max-lg:text-center">
             <span>Hello, {user.name}</span>
             <button
-              className="bg-blue-600 p-2 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors"
+              className="bg-blue-600 p-2 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors cursor-pointer"
               onClick={handleLogout}
             >
               Log out
@@ -83,6 +65,59 @@ export default function Header() {
           </NavLink>
         )}
       </div>
+
+      {/* Mobile Menu Button */}
+      <button
+        className="md:hidden text-blue-600 text-3xl"
+        onClick={() => setMenuOpen((menu) => !menu)}
+      >
+        ☰
+      </button>
+
+      {/* Mobile Menu */}
+      {menuOpen && (
+        <div className="absolute top-18 left-0 w-full bg-white shadow-md flex flex-col items-center p-4 gap-4 text-xl uppercase md:hidden z-50">
+          {["/", "/decks", "/addCard", "/learn"].map((path, idx) => (
+            <NavLink
+              key={idx}
+              to={path}
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                isActive
+                  ? "text-blue-600 hover:underline"
+                  : "hover:text-blue-500 hover:underline"
+              }
+            >
+              {["Home", "My Decks", "+ Add Card", "Learn"][idx]}
+            </NavLink>
+          ))}
+          {user ? (
+            <div className="flex gap-3 items-center border-t-1 border-gray-300 pt-2">
+              <span className="uppercase font-semibold flex items-center gap-1">
+                <FaUser />
+                {user.name}
+              </span>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleLogout();
+                }}
+                className="text-left bg-blue-600 p-2 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors"
+              >
+                Log out
+              </button>
+            </div>
+          ) : (
+            <NavLink
+              to="/login"
+              onClick={() => setMenuOpen(false)}
+              className="bg-blue-600 p-2 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors"
+            >
+              Log in
+            </NavLink>
+          )}
+        </div>
+      )}
     </header>
   );
 }

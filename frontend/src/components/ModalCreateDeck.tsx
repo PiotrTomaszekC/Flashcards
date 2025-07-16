@@ -60,6 +60,7 @@ export default function ModalCreateDeck({
               onChange={(e) => setName(e.target.value)}
               className="p-2 border rounded"
               placeholder="Deck Name"
+              required
             />
 
             <select
