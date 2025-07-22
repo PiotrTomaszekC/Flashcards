@@ -50,7 +50,7 @@ export default function DeckScreen() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col">
       <div className="sm:relative flex max-sm:flex-col max-sm:gap-3 justify-center items-center">
         <h1 className="uppercase text-4xl font-semibold">
           {deck.name} ({deck.sourceLanguage.flag} → {deck.targetLanguage.flag})

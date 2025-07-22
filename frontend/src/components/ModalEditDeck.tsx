@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import type { Deck } from "../types";
 import Loader from "./Loader";
+import LANGUAGES from "../constants";
 
 interface ModalEditDeckProps {
   editingDeck: Deck;
@@ -19,6 +20,12 @@ export default function ModalEditDeck({
     editingDeck.description
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [editSourceLanguage, setEditSourceLanguage] = useState(
+    editingDeck.sourceLanguage
+  );
+  const [editTargetLanguage, setEditTargetLanguage] = useState(
+    editingDeck.targetLanguage
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +35,8 @@ export default function ModalEditDeck({
       {
         name: editName,
         description: editDescription,
+        sourceLanguage: editSourceLanguage,
+        targetLanguage: editTargetLanguage,
       }
     );
     setIsLoading(false);
@@ -62,6 +71,37 @@ export default function ModalEditDeck({
               className="p-2 border rounded"
               placeholder="Deck Name"
             />
+            <select
+              value={editSourceLanguage.name}
+              onChange={(e) =>
+                setEditSourceLanguage(
+                  LANGUAGES.find((lang) => lang.name === e.target.value)!
+                )
+              }
+              className="p-2 border rounded"
+            >
+              {LANGUAGES.map((lang) => (
+                <option key={lang.name} value={lang.name}>
+                  {lang.flag} {lang.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={editTargetLanguage.name}
+              onChange={(e) =>
+                setEditTargetLanguage(
+                  LANGUAGES.find((lang) => lang.name === e.target.value)!
+                )
+              }
+              className="p-2 border rounded"
+            >
+              {LANGUAGES.map((lang) => (
+                <option key={lang.name} value={lang.name}>
+                  {lang.flag} {lang.name}
+                </option>
+              ))}
+            </select>
             <textarea
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}

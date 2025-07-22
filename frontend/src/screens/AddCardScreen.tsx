@@ -77,7 +77,6 @@ export default function AddCardScreen() {
       {decks.length === 0 ? (
         <div className="items-center text-lg mt-20 flex flex-col">
           <p className="max-sm:text-center">
-            {" "}
             You don't have any decks yet. Start by creating one.
           </p>
           <Link

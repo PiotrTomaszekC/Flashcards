@@ -2,19 +2,12 @@ import axios from "axios";
 import { useState } from "react";
 import Loader from "./Loader";
 import type { Deck } from "../types";
+import LANGUAGES from "../constants";
 
 interface ModalCreateDeckProps {
   setIsCreatingDeck: (value: boolean) => void;
   updateDecks: React.Dispatch<React.SetStateAction<Deck[]>>;
 }
-
-const languages = [
-  { name: "English", flag: "🇬🇧" },
-  { name: "Polish", flag: "🇵🇱" },
-  { name: "Spanish", flag: "🇪🇸" },
-  { name: "French", flag: "🇫🇷" },
-  { name: "German", flag: "🇩🇪" },
-];
 
 export default function ModalCreateDeck({
   setIsCreatingDeck,
@@ -23,8 +16,8 @@ export default function ModalCreateDeck({
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [sourceLanguage, setSourceLanguage] = useState(languages[0]);
-  const [targetLanguage, setTargetLanguage] = useState(languages[1]);
+  const [sourceLanguage, setSourceLanguage] = useState(LANGUAGES[0]);
+  const [targetLanguage, setTargetLanguage] = useState(LANGUAGES[1]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,12 +60,12 @@ export default function ModalCreateDeck({
               value={sourceLanguage.name}
               onChange={(e) =>
                 setSourceLanguage(
-                  languages.find((lang) => lang.name === e.target.value)!
+                  LANGUAGES.find((lang) => lang.name === e.target.value)!
                 )
               }
               className="p-2 border rounded"
             >
-              {languages.map((lang) => (
+              {LANGUAGES.map((lang) => (
                 <option key={lang.name} value={lang.name}>
                   {lang.flag} {lang.name}
                 </option>
@@ -83,12 +76,12 @@ export default function ModalCreateDeck({
               value={targetLanguage.name}
               onChange={(e) =>
                 setTargetLanguage(
-                  languages.find((lang) => lang.name === e.target.value)!
+                  LANGUAGES.find((lang) => lang.name === e.target.value)!
                 )
               }
               className="p-2 border rounded"
             >
-              {languages.map((lang) => (
+              {LANGUAGES.map((lang) => (
                 <option key={lang.name} value={lang.name}>
                   {lang.flag} {lang.name}
                 </option>

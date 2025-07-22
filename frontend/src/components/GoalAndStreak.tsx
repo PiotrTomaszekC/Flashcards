@@ -1,58 +1,32 @@
-import { useEffect, useState } from "react";
-import { RiProgress5Line } from "react-icons/ri";
+import axios from "axios";
 import { FaAward } from "react-icons/fa";
 import { GiProgression } from "react-icons/gi";
+import { RiProgress5Line } from "react-icons/ri";
+import type { StudyStats } from "../types";
 
-export default function GoalAndStreak() {
-  const [dailyGoal, setDailyGoal] = useState(
-    Number(localStorage.getItem("dailyGoal")) || 20
-  );
+interface GoalAndStreakProps {
+  studyStats: StudyStats | null;
+  dailyGoal: number;
+  setDailyGoal: (value: number) => void;
+}
+
+export default function GoalAndStreak({
+  studyStats,
+  dailyGoal,
+  setDailyGoal,
+}: GoalAndStreakProps) {
   const today = new Date().toISOString().split("T")[0];
-  const progressKey = `progress-${today}`;
-  const todayRepetitions = Number(localStorage.getItem(progressKey)) || 0;
+  const progressToday =
+    studyStats?.progress?.find((p) => p.date === today) || null;
 
-  function handleDailyGoal(goal: number) {
+  async function handleDailyGoal(goal: number) {
     setDailyGoal(goal);
-    localStorage.setItem("dailyGoal", goal.toString());
+    if (studyStats) {
+      await axios.put("/api/studyStats", { dailyGoal: goal });
+    }
   }
 
-  useEffect(
-    function () {
-      function updateStreak() {
-        const today = new Date().toISOString().split("T")[0];
-        const yesterday = new Date(Date.now() - 86400000)
-          .toISOString()
-          .split("T")[0];
-        //today and yesterday's date in YYYY-MM-DD
-        const lastDate = localStorage.getItem("lastStudyDate");
-        const streak = Number(localStorage.getItem("studyStreak") || 0);
-        const streakUpdatedForToday =
-          localStorage.getItem("streakUpdated") === today;
-
-        if (todayRepetitions >= dailyGoal) {
-          if (!streakUpdatedForToday) {
-            if (lastDate === yesterday) {
-              localStorage.setItem("studyStreak", (streak + 1).toString());
-            } else if (lastDate !== today) {
-              localStorage.setItem("studyStreak", "1");
-            }
-            localStorage.setItem("lastStudyDate", today);
-            localStorage.setItem("streakUpdated", today);
-          }
-        } else {
-          // If the streak was already updated today but the new goal is not met, subtract
-          if (streakUpdatedForToday) {
-            const newStreak = Math.max(0, streak - 1);
-            localStorage.setItem("studyStreak", newStreak.toString());
-            localStorage.removeItem("streakUpdated");
-            localStorage.removeItem("lastStudyDate");
-          }
-        }
-      }
-      updateStreak();
-    },
-    [todayRepetitions, dailyGoal]
-  );
+  console.log(dailyGoal, studyStats?.dailyGoal);
 
   return (
     <div className="bg-blue-100 py-2 rounded-md w-full lg:w-4/5 px-8 font-semibold">
@@ -91,18 +65,20 @@ export default function GoalAndStreak() {
         </div>
         <div
           className={`${
-            todayRepetitions >= dailyGoal ? "bg-green-400" : "bg-yellow-200"
+            progressToday && progressToday.repetitions >= dailyGoal
+              ? "bg-green-400"
+              : "bg-yellow-200"
           }  rounded-md px-4 py-2 flex gap-2 max-sm:justify-center items-center text-xl`}
         >
-          {todayRepetitions >= dailyGoal ? (
+          {progressToday && progressToday.repetitions >= dailyGoal ? (
             <FaAward className="text-4xl" />
           ) : (
             <RiProgress5Line className="text-4xl" />
           )}
 
           <span>
-            {todayRepetitions} Repetition{todayRepetitions === 1 ? "" : "s"}{" "}
-            Today
+            {progressToday ? progressToday.repetitions : 0} Repetition
+            {progressToday?.repetitions === 1 ? "" : "s"} Today
           </span>
         </div>
         <div
@@ -110,8 +86,8 @@ export default function GoalAndStreak() {
         >
           <GiProgression className="text-4xl" />
           <span>
-            Current Streak: {localStorage.getItem("studyStreak") || 0} Day
-            {Number(localStorage.getItem("studyStreak")) === 1 ? "" : "s"}
+            Current Streak: {studyStats ? studyStats.studyStreak : 0} Day
+            {studyStats && studyStats.studyStreak === 1 ? "" : "s"}
           </span>
         </div>
       </div>

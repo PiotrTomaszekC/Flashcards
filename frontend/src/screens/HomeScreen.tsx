@@ -5,12 +5,13 @@ import { FaCheck } from "react-icons/fa";
 import { FiRepeat } from "react-icons/fi";
 import { FaPercent } from "react-icons/fa";
 import { useEffect, useState, type ReactNode } from "react";
-import { type Flashcard, type Deck } from "../types";
+import type { Flashcard, Deck, StudyStats } from "../types";
 import axios from "axios";
 import Loader from "../components/Loader";
 import { GoChevronRight } from "react-icons/go";
 import { Link } from "react-router-dom";
 import GoalAndStreak from "../components/GoalAndStreak";
+import { useAuth } from "../context/authContext";
 
 interface StatProps {
   children: ReactNode;
@@ -19,25 +20,63 @@ interface StatProps {
 }
 
 export default function HomeScreen() {
+  const { user } = useAuth();
   const [decks, setDecks] = useState<Deck[]>([]);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [studyStats, setStudyStats] = useState<StudyStats | null>(null);
+  const [dailyGoal, setDailyGoal] = useState(0);
+  const [recentDecks, setRecentDecks] = useState<Deck[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(function () {
-    async function fetchDeckAndCards() {
-      try {
-        const { data: decksData } = await axios.get("/api/sets");
-        setDecks(decksData);
-        const { data: flashcardsData } = await axios.get("/api/flashcards");
-        setFlashcards(flashcardsData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
+  useEffect(
+    function () {
+      async function fetchDeckCardsStats() {
+        if (!user) {
+          setDecks([]);
+          setFlashcards([]);
+          setStudyStats(null);
+          setRecentDecks([]);
+          // setDailyGoal(20);
+          setIsLoading(false);
+          return;
+        }
+
+        try {
+          const [decksRes, flashcardsRes, statsRes, userRes] =
+            await Promise.all([
+              axios.get("/api/sets"),
+              axios.get("/api/flashcards"),
+              axios.get("/api/studyStats"),
+              axios.get("/api/users/profile"),
+            ]);
+
+          const allDecks: Deck[] = decksRes.data;
+          const recentDeckIds: string[] = userRes.data.recentDecks;
+
+          const matchedRecentDecks = recentDeckIds
+            .map((id) => allDecks.find((deck) => deck._id === id))
+            .filter((deck): deck is Deck => Boolean(deck));
+
+          setDecks(decksRes.data);
+          setFlashcards(flashcardsRes.data);
+          setStudyStats(statsRes.data);
+          setRecentDecks(matchedRecentDecks);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        } finally {
+          setIsLoading(false);
+        }
       }
+      fetchDeckCardsStats();
+    },
+    [user]
+  );
+
+  useEffect(() => {
+    if (studyStats) {
+      setDailyGoal(studyStats.dailyGoal);
     }
-    fetchDeckAndCards();
-  }, []);
+  }, [studyStats]);
 
   if (isLoading)
     return (
@@ -58,9 +97,6 @@ export default function HomeScreen() {
   const repetitions = flashcards.reduce(
     (acc, card) => acc + card.repetitions,
     0
-  );
-  const lastDecks: Deck[] = JSON.parse(
-    localStorage.getItem("recentDecks") || "[]"
   );
 
   return (
@@ -94,8 +130,8 @@ export default function HomeScreen() {
         <h2 className="uppercase text-2xl text-blue-700 font-bold">
           Recently studied decks
         </h2>
-        <div className="flex max-sm:flex-col gap-4 lg:gap-10 mt-4">
-          {!lastDecks.length ? (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-10 mt-4">
+          {!recentDecks.length ? (
             <div className="bg-white rounded-md px-4 py-2 text-xl flex flex-col items-center gap-2">
               <span>You haven't studied any decks yet.</span>
               <Link
@@ -106,7 +142,7 @@ export default function HomeScreen() {
               </Link>
             </div>
           ) : (
-            lastDecks.map((deck) => (
+            recentDecks.map((deck) => (
               <Link
                 to={`/decks/${deck._id}`}
                 key={deck._id}
@@ -126,7 +162,11 @@ export default function HomeScreen() {
           )}
         </div>
       </div>
-      <GoalAndStreak />
+      <GoalAndStreak
+        studyStats={studyStats}
+        dailyGoal={dailyGoal}
+        setDailyGoal={setDailyGoal}
+      />
     </div>
   );
 }

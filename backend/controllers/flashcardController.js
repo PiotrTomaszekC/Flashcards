@@ -13,13 +13,8 @@ const getFlashcards = asyncHandler(async (req, res) => {
   if (setId) {
     query.set = setId;
   }
+
   const flashcards = await Card.find(query);
-
-  if (flashcards.length === 0) {
-    res.status(404);
-    throw new Error("No flashcards found for this set or user");
-  }
-
   res.json(flashcards);
 });
 

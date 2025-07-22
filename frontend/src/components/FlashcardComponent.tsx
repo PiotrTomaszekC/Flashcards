@@ -22,16 +22,12 @@ export default function FlashcardComponent({
   const currentCard = flashcards[currentIndex];
   const [remember, setRemember] = useState(currentCard.remember);
 
-  const today = new Date().toISOString().split("T")[0];
-  const progressKey = `progress-${today}`;
-
   useEffect(() => {
     setRemember(currentCard.remember);
   }, [currentCard]);
 
-  function incrementDailyProgress() {
-    const current = Number(localStorage.getItem(progressKey) || 0);
-    localStorage.setItem(progressKey, (current + 1).toString());
+  async function incrementDailyProgress() {
+    await axios.post("/api/studyStats");
   }
 
   async function updateFlashcard() {
@@ -104,7 +100,7 @@ export default function FlashcardComponent({
   }
 
   return (
-    <div className="flex flex-col items-center mt-4 w-[90%] sm:w-[60%] lg:w-1/4 h-1/2 py-5">
+    <div className="flex flex-col items-center mt-4 w-[90%] sm:w-[60%] lg:w-1/4 min-h-[400px] py-5">
       {!isFlipping && (
         <div
           className="relative flex-1 w-full cursor-pointer"

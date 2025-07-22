@@ -21,3 +21,17 @@ export interface Deck {
   sourceLanguage: Language;
   targetLanguage: Language;
 }
+
+interface Progress {
+  date: string;
+  repetitions: number;
+  streakUpdated: boolean;
+}
+
+export interface StudyStats {
+  _id: string;
+  dailyGoal: number;
+  studyStreak: number;
+  lastStudyDate?: string;
+  progress?: Progress[];
+}

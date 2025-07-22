@@ -72,6 +72,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      recentDecks: user.recentDecks,
     });
   } else {
     res.status(404);
@@ -106,10 +107,32 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+//@desc Add recently learned decks (max 3)
+//@route PUT /api/users
+//@access Private
+const addRecentDeck = asyncHandler(async (req, res) => {
+  const { deckId } = req.body;
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    user.recentDecks = user.recentDecks.filter(
+      (id) => id.toString() !== deckId.toString()
+    );
+    user.recentDecks.unshift(deckId);
+    user.recentDecks = user.recentDecks.slice(0, 3);
+    const updatedUser = await user.save();
+    res.status(200).json(updatedUser);
+  } else {
+    res.status(404);
+    throw new Error("User not found");
+  }
+});
+
 export {
   authUser,
   getUserProfile,
   logoutUser,
   registerUser,
   updateUserProfile,
+  addRecentDeck,
 };

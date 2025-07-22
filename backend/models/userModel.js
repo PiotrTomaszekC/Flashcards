@@ -1,12 +1,20 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import StudyStats from "./studyStatsModel.js";
 
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    recentDecks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Set",
+      },
+    ],
   },
+
   { timestamps: true }
 );
 
@@ -21,6 +29,20 @@ userSchema.pre("save", async function (next) {
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// Automatically create StudyStats after a new user is saved
+userSchema.post("save", async function (doc, next) {
+  try {
+    const existingStats = await StudyStats.findOne({ user: doc._id });
+    if (!existingStats) {
+      await StudyStats.create({ user: doc._id });
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 const User = mongoose.model("User", userSchema);
