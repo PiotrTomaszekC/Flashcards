@@ -23,9 +23,6 @@ jobs:
       - name: Install backend dependencies
         run: npm install
 
-      - name: Check vitest installation
-        run: ls -la node_modules/.bin && cat package.json
-
       - name: Install frontend dependencies
         run: npm install --prefix frontend
 
@@ -36,9 +33,15 @@ jobs:
         working-directory: ./frontend
         run: npm run lint
 
+      - name: Fix vitest permissions
+        run: chmod +x node_modules/.bin/vitest
+
       - name: Run backend tests with coverage
-        run: npx vitest run --coverage
+        run: npm run test:coverage
+
+      - name: Fix vitest permissions (frontend)
+        run: chmod +x frontend/node_modules/.bin/vitest
 
       - name: Run frontend tests with coverage
         working-directory: ./frontend
-        run: npx vitest run --coverage
+        run: npm run test:coverage
