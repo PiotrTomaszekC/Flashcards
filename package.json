@@ -10,7 +10,9 @@
     "client": "npm run dev --prefix frontend",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "data:import": "node backend/seeder.js",
-    "data:destroy": "node backend/seeder.js -d"
+    "data:destroy": "node backend/seeder.js -d",
+    "test:backend": "cross-env NODE_ENV=test vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "author": "Piotr Tomaszek",
   "license": "MIT",
@@ -27,7 +29,13 @@
     "multer": "^2.0.2"
   },
   "devDependencies": {
+    "@types/supertest": "^6.0.3",
+    "@vitest/coverage-v8": "^3.2.4",
     "concurrently": "^9.2.0",
-    "nodemon": "^3.1.10"
+    "cross-env": "^10.0.0",
+    "mongodb-memory-server": "^10.1.4",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.1.4",
+    "vitest": "^3.2.4"
   }
 }

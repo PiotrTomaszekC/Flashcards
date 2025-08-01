@@ -40,24 +40,24 @@ export default function GoalAndStreak({
             <button
               onClick={() => handleDailyGoal(20)}
               className={`${
-                dailyGoal === 20 && "bg-red-500"
-              } hover:bg-red-500 rounded-md px-2 py-1 cursor-pointer`}
+                dailyGoal === 20 && "bg-blue-600 text-white"
+              } hover:bg-blue-600 hover:text-white transition-colors rounded-md px-2 py-1 cursor-pointer`}
             >
               20
             </button>
             <button
               onClick={() => handleDailyGoal(50)}
               className={`${
-                dailyGoal === 50 && "bg-red-500"
-              } hover:bg-red-500 rounded-md px-2 py-1 cursor-pointer`}
+                dailyGoal === 50 && "bg-blue-600 text-white"
+              } hover:bg-blue-600 hover:text-white transition-colors rounded-md px-2 py-1 cursor-pointer`}
             >
               50
             </button>
             <button
               onClick={() => handleDailyGoal(100)}
               className={`${
-                dailyGoal === 100 && "bg-red-500"
-              } hover:bg-red-500 rounded-md px-2 py-1 cursor-pointer`}
+                dailyGoal === 100 && "bg-blue-600 text-white"
+              } hover:bg-blue-600 hover:text-white transition-colors rounded-md px-2 py-1 cursor-pointer`}
             >
               100
             </button>

@@ -39,7 +39,17 @@ export default function Header() {
         <div className="text-xl hidden md:block ml-10">
           {user ? (
             <div className="flex gap-5 items-center max-lg:text-center">
-              <span>Hello, {user.name}</span>
+              <NavLink
+                to="/user"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-blue-600 flex gap-1 items-center"
+                    : "hover:text-blue-500 flex gap-1 items-center transition-colors"
+                }
+              >
+                <FaUser className="text-2xl" />
+                <span className="hidden lg:inline">{user.name}</span>
+              </NavLink>
               <button
                 className="bg-blue-600 p-2 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors cursor-pointer"
                 onClick={() => setIsLogout(true)}
@@ -84,10 +94,18 @@ export default function Header() {
             ))}
             {user ? (
               <div className="flex gap-3 items-center border-t-1 border-gray-300 pt-2">
-                <span className="uppercase font-semibold flex items-center gap-1">
+                <NavLink
+                  to="/user"
+                  onClick={() => setMenuOpen(false)}
+                  className={({ isActive }) =>
+                    isActive
+                      ? "text-blue-600 uppercase font-semibold flex items-center gap-1"
+                      : "hover:text-blue-500 uppercase font-semibold flex items-center gap-1"
+                  }
+                >
                   <FaUser />
                   {user.name}
-                </span>
+                </NavLink>
                 <button
                   onClick={() => {
                     setMenuOpen(false);

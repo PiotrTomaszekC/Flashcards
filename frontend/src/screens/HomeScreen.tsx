@@ -80,7 +80,7 @@ export default function HomeScreen() {
 
   if (isLoading)
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <Loader />
       </div>
     );
@@ -146,7 +146,7 @@ export default function HomeScreen() {
               <Link
                 to={`/decks/${deck._id}`}
                 key={deck._id}
-                className="bg-white rounded-md p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 hover:bg-blue-300 transition-colors w-full"
+                className="bg-white rounded-md p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 hover:bg-blue-600 hover:text-white transition-colors w-full"
               >
                 <div className="flex flex-col items-center sm:items-start">
                   <h4 className="font-semibold text-2xl">{deck.name}</h4>

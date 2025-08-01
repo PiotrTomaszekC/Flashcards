@@ -32,3 +32,10 @@ jobs:
       - name: Run ESLint
         working-directory: ./frontend
         run: npm run lint
+
+      - name: Run backend tests with coverage
+        run: npm run test:coverage
+
+      - name: Run frontend tests with coverage
+        working-directory: ./frontend
+        run: npm run test:coverage

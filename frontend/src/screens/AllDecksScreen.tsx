@@ -100,7 +100,7 @@ export default function AllDecksScreen() {
 
   if (isLoading)
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <Loader />
       </div>
     );
@@ -180,11 +180,13 @@ export default function AllDecksScreen() {
 
                 <Link
                   to={`/addCard?deck=${deck._id}`}
+                  data-testid={`add-card-link-${deck._id}`}
                   className="bg-transparent hover:bg-blue-200 p-2 rounded transition-colors cursor-pointer text-xl"
                 >
                   <FaPlus />
                 </Link>
                 <button
+                  data-testid={`edit-deck-${deck._id}`}
                   className="bg-transparent hover:bg-blue-200 p-2 rounded transition-colors cursor-pointer text-xl"
                   onClick={() => {
                     setEditingDeck(deck);
@@ -193,6 +195,7 @@ export default function AllDecksScreen() {
                   <FaEdit />
                 </button>
                 <button
+                  data-testid={`delete-deck-${deck._id}`}
                   className=" bg-transparent hover:bg-blue-200 p-2 rounded transition-colors cursor-pointer text-xl"
                   // onClick={() => handleDelete(deck._id)}
                   onClick={() => setDeletingDeck(deck)}
@@ -201,6 +204,7 @@ export default function AllDecksScreen() {
                 </button>
                 <Link
                   to={`/decks/${deck._id}`}
+                  data-testid={`decks-link-${deck._id}`}
                   onClick={() => saveToRecentDecks(deck._id)}
                   className="bg-blue-500 px-3 py-2 rounded-md hover:bg-blue-600 transition-colors text-white font-semibold text-xl text-center"
                 >

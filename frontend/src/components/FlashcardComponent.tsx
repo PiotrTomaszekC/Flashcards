@@ -153,6 +153,7 @@ export default function FlashcardComponent({
           }`}
         >
           <button
+            data-testid="previous-card-button"
             onClick={handlePrevious}
             className="p-2 hover:text-blue-600 transition-colors hover:cursor-pointer"
           >
@@ -161,6 +162,7 @@ export default function FlashcardComponent({
 
           <div className="flex gap-4 items-center">
             <button
+              data-testid="remember-button"
               className={`hover:text-blue-600 transition-colors hover:cursor-pointer ${
                 remember && "text-blue-600"
               }`}
@@ -170,6 +172,7 @@ export default function FlashcardComponent({
             </button>
 
             <button
+              data-testid="delete-button"
               className="hover:text-blue-600 transition-colors hover:cursor-pointer"
               onClick={deleteFlashcard}
             >
@@ -182,6 +185,7 @@ export default function FlashcardComponent({
           </div>
 
           <button
+            data-testid="next-card-button"
             onClick={handleNext}
             className="p-2 hover:text-blue-600 transition-colors hover:cursor-pointer"
           >

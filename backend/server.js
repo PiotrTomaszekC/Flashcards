@@ -11,7 +11,7 @@ import cookieParser from "cookie-parser";
 
 const port = process.env.PORT || 5000;
 
-connectDB(); //Connect to MongoDB
+// connectDB();
 
 const app = express();
 
@@ -32,4 +32,9 @@ app.use("/api/studyStats", studyStatsRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(port, () => console.log(`Server is running on port ${port}`));
+if (process.env.NODE_ENV !== "test") {
+  connectDB();
+  app.listen(port, () => console.log(`Server is running on port ${port}`));
+}
+
+export default app;

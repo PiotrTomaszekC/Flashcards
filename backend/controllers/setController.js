@@ -32,12 +32,19 @@ const getSetById = asyncHandler(async (req, res) => {
 //@access Private
 const addSet = asyncHandler(async (req, res) => {
   const { name, description, sourceLanguage, targetLanguage } = req.body;
-  const setExists = await Set.findOne({
+
+  const existingSets = await Set.find({
     user: req.user._id,
     name,
-    sourceLanguage,
-    targetLanguage,
   });
+
+  const setExists = existingSets.some(
+    (set) =>
+      set.sourceLanguage.name === sourceLanguage.name &&
+      set.sourceLanguage.flag === sourceLanguage.flag &&
+      set.targetLanguage.name === targetLanguage.name &&
+      set.targetLanguage.flag === targetLanguage.flag
+  );
 
   if (setExists) {
     res.status(400);
