@@ -1,46 +1,48 @@
-import { useState } from "react";
-import { useAuth } from "../context/authContext";
+import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
 import Loader from "../components/Loader";
+import { useAuth } from "../context/authContext";
+import {
+  userProfileSchema,
+  type UserProfileFormData,
+} from "../validation/userSchemas";
 
 export default function UserProfileScreen() {
   const { user, setUser } = useAuth();
-  const [name, setName] = useState(user!.name);
-  const [email, setEmail] = useState(user!.email);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const initialValues = {
+    name: user!.name,
+    email: user!.email,
+    password: "",
+    confirmPassword: "",
+  };
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<UserProfileFormData>({
+    defaultValues: initialValues,
+    resolver: zodResolver(userProfileSchema),
+  });
+  const watchedValues = useWatch({ control });
   const [isUpdating, setIsUpdating] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    if (
-      !name.trim() &&
-      !email.trim() &&
-      !password.trim() &&
-      !confirmPassword.trim()
-    ) {
-      alert("No data entered");
-      return;
-    }
-    if (password !== confirmPassword) {
-      alert("Passwords don't match!");
-      return;
-    }
-
+  async function onSubmit(data: UserProfileFormData) {
     setIsUpdating(true);
     try {
       const { data: updatedUser } = await axios.put("/api/users/profile", {
-        name,
-        email,
-        password,
+        name: data.name,
+        email: data.email,
+        password: data.password,
       });
       setUser(updatedUser);
       localStorage.setItem("userInfo", JSON.stringify(updatedUser));
       toast.success("User profile updated!");
-      setPassword("");
-      setConfirmPassword("");
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message || "Update failed");
@@ -53,17 +55,10 @@ export default function UserProfileScreen() {
   }
 
   const isFormUnchanged =
-    name === user!.name &&
-    email === user!.email &&
-    password.trim() === "" &&
-    confirmPassword.trim() === "";
-
-  const isFormInvalid =
-    !name.trim() ||
-    !email.trim() ||
-    (password.trim() !== "" && password !== confirmPassword);
-
-  const isButtonDisabled = isFormUnchanged || isFormInvalid;
+    watchedValues.name === initialValues.name &&
+    watchedValues.email === initialValues.email &&
+    watchedValues.password!.trim() === "" &&
+    watchedValues.confirmPassword!.trim() === "";
 
   if (isUpdating) {
     return (
@@ -81,59 +76,79 @@ export default function UserProfileScreen() {
 
       <form
         className="w-full sm:w-[80%] lg:w-[30%] flex flex-col bg-white rounded-md p-6 text-2xl gap-6 shadow-md"
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
       >
+        {/* Name */}
         <div className="flex flex-col items-start gap-1 w-full">
           <label htmlFor="name">Name</label>
           <input
             id="name"
             type="text"
             className="border-blue-400 border rounded-md w-full p-2 focus:outline-2 focus:outline-blue-500 outline-offset-[-1px]"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          ></input>
+            {...register("name")}
+          />
+          {errors?.name?.message && (
+            <p className="text-red-600 text-base">{errors.name.message}</p>
+          )}
         </div>
 
+        {/* Email */}
         <div className="flex flex-col items-start gap-1 w-full">
           <label htmlFor="email">Email</label>
           <input
             id="email"
             type="text"
             className="border-blue-400 border rounded-md w-full p-2 focus:outline-2 focus:outline-blue-500 outline-offset-[-1px]"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          ></input>
+            {...register("email")}
+          />
+          {errors?.email?.message && (
+            <p className="text-red-600 text-base">{errors.email.message}</p>
+          )}
         </div>
 
+        {/* Password */}
         <div className="flex flex-col items-start gap-1 w-full">
           <label htmlFor="password">New Password</label>
           <input
             id="password"
             type="password"
             className="border-blue-400 border rounded-md w-full p-2 focus:outline-2 focus:outline-blue-500 outline-offset-[-1px]"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          ></input>
+            {...register("password")}
+          />
+          {errors?.password?.message && (
+            <p className="text-red-600 text-base">{errors.password.message}</p>
+          )}
         </div>
 
+        {/* Confirm password */}
         <div className="flex flex-col items-start gap-1 w-full">
           <label htmlFor="confirmPassword">Confirm New Password</label>
           <input
             id="confirmPassword"
             type="password"
             className="border-blue-400 border rounded-md w-full p-2 focus:outline-2 focus:outline-blue-500 outline-offset-[-1px]"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          ></input>
+            {...register("confirmPassword")}
+          />
+          {errors?.confirmPassword?.message && (
+            <p className="text-red-600 text-base">
+              {errors.confirmPassword.message}
+            </p>
+          )}
         </div>
 
+        {/*using aria-disabled so that the cursor not allowed icon is displayed on hover*/}
         <button
           type="submit"
-          disabled={isButtonDisabled}
-          className={` rounded-md transition-colors cursor-pointer mr-auto p-2 font-semibold ${
-            isButtonDisabled
-              ? "bg-gray-400 text-white cursor-not-allowed"
-              : "bg-blue-500 text-white hover:bg-blue-600"
+          aria-disabled={isFormUnchanged}
+          onClick={(e) => {
+            if (isFormUnchanged) {
+              e.preventDefault();
+            }
+          }}
+          className={`rounded-md transition-colors font-semibold mr-auto p-2 ${
+            isFormUnchanged
+              ? "bg-gray-400 text-white cursor-not-allowed hover:bg-gray-400"
+              : "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
           }`}
         >
           Update profile

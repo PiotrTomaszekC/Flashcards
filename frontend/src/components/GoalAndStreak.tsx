@@ -26,8 +26,6 @@ export default function GoalAndStreak({
     }
   }
 
-  console.log(dailyGoal, studyStats?.dailyGoal);
-
   return (
     <div className="bg-blue-100 py-2 rounded-md w-full lg:w-4/5 px-8 font-semibold">
       <h2 className="uppercase text-2xl text-blue-700 font-bold">Study goal</h2>
