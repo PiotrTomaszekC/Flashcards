@@ -4,7 +4,7 @@ import { z } from "zod";
 const baseUserSchema = z.object({
   name: z
     .string()
-    .min(4, "Username has to be longer than 3 letters")
+    .min(4, "Username must have at least 4 letters")
     .nonempty("That field is required"),
   email: z
     .string()
@@ -27,7 +27,7 @@ export const userProfileSchema = baseUserSchema
           (val.length >= 8 && /[A-Z]/.test(val) && /\d/.test(val)),
         {
           message:
-            "Password must be at least 8 characters, contain an uppercase letter and a number",
+            "Password must have at least 8 characters, contain an uppercase letter and a number",
         }
       ),
   })
@@ -41,7 +41,7 @@ export const userRegisterSchema = baseUserSchema
   .extend({
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters")
+      .min(8, "Password must have at least 8 characters")
       .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
       .regex(/\d/, "Password must contain at least one number"),
   })
