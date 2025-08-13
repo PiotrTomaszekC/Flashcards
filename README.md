@@ -7,10 +7,9 @@ A full-stack Flashcards app built with **React + TypeScript** on the frontend an
 ## 🚀 Features
 
 - User authentication (JWT-based)
-- Create, edit, delete flashcards
-- Organize flashcards into categories
-- Import/export flashcards via CSV
-- Responsive UI built with React + TypeScript
+- Create, edit, delete flashcards & decks
+- Import/export decks via CSV
+- Responsive UI built with React + TypeScript + Tailwind CSS
 - RESTful API with Express.js
 - MongoDB for data persistence
 - Backend and frontend testing with Vitest and Supertest
@@ -26,6 +25,10 @@ A full-stack Flashcards app built with **React + TypeScript** on the frontend an
 - **CSV Handling**: csv-parser, json2csv
 - **Testing**: Vitest, Supertest, mongodb-memory-server
 - **Dev Tools**: Nodemon, Concurrently, Cross-env
+- **Global State Management**: Context API
+- **Form Handling & Validation**: React Hook Form & Zod
+- **Server State Management**: React Query
+- **Internationalization**: react-i18next
 
 ---
 
