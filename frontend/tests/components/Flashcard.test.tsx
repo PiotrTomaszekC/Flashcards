@@ -23,14 +23,7 @@ const flashcards = [
   },
 ];
 
-const mockSetFlashcards = () => {};
-
-render(
-  <FlashcardComponent
-    flashcards={flashcards}
-    setFlashcards={mockSetFlashcards}
-  />
-);
+render(<FlashcardComponent flashcards={flashcards} />);
 
 const user = userEvent.setup();
 const word = screen.getByRole("heading", { name: "Dog" });
