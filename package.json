@@ -12,7 +12,8 @@
     "data:import": "node backend/seeder.js",
     "data:destroy": "node backend/seeder.js -d",
     "test:backend": "cross-env NODE_ENV=test vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "author": "Piotr Tomaszek",
   "license": "MIT",
