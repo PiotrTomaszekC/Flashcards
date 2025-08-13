@@ -14,12 +14,12 @@ import {
 const router = express.Router();
 
 router.route("/").get(protect, getMySets).post(protect, addSet);
+router.get("/:id/export-csv", protect, exportSet);
 router
   .route("/:id")
   .get(protect, getSetById)
   .put(protect, editSet)
   .delete(protect, deleteSet);
-router.get("/:id/export-csv", protect, exportSet);
 router.post("/import-csv", protect, upload.single("file"), importSet);
 
 export default router;
