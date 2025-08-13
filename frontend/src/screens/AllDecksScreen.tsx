@@ -1,41 +1,28 @@
-import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { MdFileUpload } from "react-icons/md";
-import { toast } from "react-toastify";
 import DeckComponent from "../components/DeckComponent";
 import Loader from "../components/Loader";
 import ModalConfirmDeletion from "../components/ModalConfirmDeletion";
 import ModalCreateDeck from "../components/ModalCreateDeck";
 import ModalEditDeck from "../components/ModalEditDeck";
-import type { Deck, Flashcard } from "../types";
+import { useDecks, useImportDeck } from "../hooks/useDecks";
+import { useFlashcards } from "../hooks/useFlashcards";
+import type { Deck } from "../types";
+import { useTranslation } from "react-i18next";
 
 export default function AllDecksScreen() {
-  const [decks, setDecks] = useState<Deck[]>([]);
-  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const { data: decks = [], isLoading: loadingDecks } = useDecks();
+  const { data: flashcards = [], isLoading: loadingFlashcards } =
+    useFlashcards();
+  const { mutate: importDeck } = useImportDeck();
   const [editingDeck, setEditingDeck] = useState<Deck | null>(null);
   const [isCreatingDeck, setIsCreatingDeck] = useState(false);
   const [deletingDeck, setDeletingDeck] = useState<Deck | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const isLoading = loadingDecks || loadingFlashcards;
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { t } = useTranslation();
 
-  useEffect(() => {
-    async function fetchDeckAndCards() {
-      try {
-        const { data: decksData } = await axios.get("/api/sets");
-        setDecks(decksData);
-
-        const { data: flashcardsData } = await axios.get("/api/flashcards");
-        setFlashcards(flashcardsData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchDeckAndCards();
-  }, []);
-
-  async function handleImportCSV(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleImportCSV(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -53,24 +40,7 @@ export default function AllDecksScreen() {
       "targetLanguage",
       JSON.stringify({ name: "Polish", flag: "🇵🇱" })
     );
-
-    try {
-      await axios.post("/api/sets/import-csv", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      toast.success("Deck imported successfully!");
-
-      // Refresh decks and flashcards after import
-      const [updatedDecks, updatedFlashcards] = await Promise.all([
-        axios.get("/api/sets"),
-        axios.get("/api/flashcards"),
-      ]);
-
-      setDecks(updatedDecks.data);
-      setFlashcards(updatedFlashcards.data);
-    } catch (error) {
-      console.error("Error importing CSV:", error);
-    }
+    importDeck(formData);
   }
 
   if (isLoading)
@@ -83,14 +53,14 @@ export default function AllDecksScreen() {
   return (
     <div className="flex flex-col gap-4">
       <div className="sm:relative flex max-lg:flex-col max-lg:gap-3 justify-center items-center">
-        <h1 className="uppercase text-4xl font-semibold">Decks</h1>
+        <h1 className="uppercase text-4xl font-semibold">{t("myDecks")}</h1>
         {decks.length > 0 && (
           <div className="lg:absolute lg:right-0 flex max-sm:flex-col  gap-2">
             <button
               onClick={() => fileInputRef.current?.click()}
               className="bg-green-500 hover:bg-green-600 text-white transition-colors font-semibold px-4 py-2 rounded text-xl cursor-pointer flex items-center gap-2"
             >
-              <MdFileUpload /> Import Deck (CSV)
+              <MdFileUpload /> {t("importDeck")}
             </button>
             <input
               type="file"
@@ -103,7 +73,7 @@ export default function AllDecksScreen() {
               className=" bg-green-500 hover:bg-green-600 text-white transition-colors font-semibold px-4 py-2 rounded text-xl cursor-pointer"
               onClick={() => setIsCreatingDeck(true)}
             >
-              + Add Deck
+              {t("addDeck")}
             </button>
           </div>
         )}
@@ -111,12 +81,12 @@ export default function AllDecksScreen() {
 
       {!decks.length ? (
         <div className="items-center text-lg mt-20 flex flex-col">
-          <p> You have no decks yet.</p>
+          <p>{t("noDecks")}</p>
           <button
             onClick={() => setIsCreatingDeck(true)}
             className="text-white bg-blue-500 hover:bg-blue-600 transition-colors px-3 py-2 rounded-md font-semibold mt-2 cursor-pointer text-2xl"
           >
-            Create a Deck
+            {t("createDeck")}
           </button>
         </div>
       ) : (
@@ -127,6 +97,7 @@ export default function AllDecksScreen() {
               flashcards={flashcards}
               setEditingDeck={setEditingDeck}
               setDeletingDeck={setDeletingDeck}
+              learn={t("learn")}
             />
           ))}
         </div>
@@ -136,20 +107,24 @@ export default function AllDecksScreen() {
         <ModalEditDeck
           editingDeck={editingDeck}
           setEditingDeck={setEditingDeck}
-          updateDecks={setDecks}
+          editDeckS={t("editDeck")}
+          save={t("save")}
         />
       )}
       {isCreatingDeck && (
         <ModalCreateDeck
           setIsCreatingDeck={setIsCreatingDeck}
-          updateDecks={setDecks}
+          create={t("createDeck")}
+          save={t("save")}
         />
       )}
       {deletingDeck && (
         <ModalConfirmDeletion
           deletingDeck={deletingDeck}
           setDeletingDeck={setDeletingDeck}
-          updateDecks={setDecks}
+          confirmD={t("confirmD")}
+          deleteD={t("deleteD")}
+          cancel={t("cancel")}
         />
       )}
     </div>

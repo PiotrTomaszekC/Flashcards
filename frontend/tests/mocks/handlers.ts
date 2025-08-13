@@ -229,8 +229,8 @@ export const handlers = [
       _id: "deck1",
       name: "Spanish Basics",
       description: "Spanish words",
-      sourceLanguage: { name: "English" },
-      targetLanguage: { name: "Spanish" },
+      sourceLanguage: { name: "English", flag: "🇬🇧" },
+      targetLanguage: { name: "Spanish", flag: "🇪🇸" },
     });
   }),
   http.get("/api/flashcards?setId=deck1", async () => {

@@ -1,19 +1,18 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import type { Flashcard } from "../types";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { FaTrash } from "react-icons/fa";
 import { GrCaretNext, GrCaretPrevious } from "react-icons/gr";
 import { IoCheckmarkSharp } from "react-icons/io5";
-import { FaTrash } from "react-icons/fa";
-import axios from "axios";
-import { toast } from "react-toastify";
+import { useDeleteFlashcard, useUpdateFlashcard } from "../hooks/useFlashcards";
+import type { Flashcard } from "../types";
+import { useTranslation } from "react-i18next";
 
 interface FlashcardComponentProps {
   flashcards: Flashcard[];
-  setFlashcards: Dispatch<SetStateAction<Flashcard[]>>;
 }
 
 export default function FlashcardComponent({
   flashcards,
-  setFlashcards,
 }: FlashcardComponentProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
@@ -21,6 +20,9 @@ export default function FlashcardComponent({
   //temporarily hides the card and buttons during transitions so that they don't "appear" before they should
   const currentCard = flashcards[currentIndex];
   const [remember, setRemember] = useState(currentCard.remember);
+  const { mutate: updateCard } = useUpdateFlashcard();
+  const { mutate: deleteCard } = useDeleteFlashcard();
+  const { t } = useTranslation();
 
   useEffect(() => {
     setRemember(currentCard.remember);
@@ -30,40 +32,23 @@ export default function FlashcardComponent({
     await axios.post("/api/studyStats");
   }
 
-  async function updateFlashcard() {
-    try {
-      await axios.put(`/api/flashcards/${currentCard._id}`, {
-        remember,
-      });
-      setFlashcards((prev) =>
-        prev.map((card) =>
-          card._id === currentCard._id ? { ...card, remember } : card
-        )
-      );
-    } catch (error) {
-      console.error("Failed to update flashcard:", error);
-    }
+  function updateFlashcard() {
+    updateCard({ currentCardId: currentCard._id, remember });
   }
 
-  async function deleteFlashcard() {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this flashcard?"
-    );
+  function deleteFlashcard() {
+    const confirmed = window.confirm(t("confirmFDelete"));
     if (confirmed) {
-      try {
-        await axios.delete(`/api/flashcards/${currentCard._id}`);
-        setFlashcards((prev) => {
-          const updated = prev.filter((card) => card._id !== currentCard._id);
-
-          if (currentIndex >= updated.length && updated.length > 0) {
-            setCurrentIndex(updated.length - 1);
+      deleteCard(currentCard._id, {
+        onSuccess: () => {
+          const newLength = flashcards.length - 1;
+          if (newLength === 0) {
+            setCurrentIndex(0);
+          } else if (currentIndex >= newLength) {
+            setCurrentIndex(newLength - 1);
           }
-          return updated;
-        });
-        toast.success("Flashcard deleted");
-      } catch (error) {
-        console.error("Failed to delete flashcard:", error);
-      }
+        },
+      });
     }
   }
 
@@ -75,7 +60,7 @@ export default function FlashcardComponent({
     setTimeout(() => {
       setCurrentIndex((prev) => (prev + 1) % flashcards.length);
       setIsFlipping(false);
-    }, 300); // Match this to your CSS transition duration
+    }, 300);
   }
 
   function handlePrevious() {

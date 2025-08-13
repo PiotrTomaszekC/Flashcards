@@ -1,29 +1,27 @@
-import axios from "axios";
+import { useDeleteDeck } from "../hooks/useDecks";
 import type { Deck } from "../types";
-import { toast } from "react-toastify";
-import { useState } from "react";
 import Loader from "./Loader";
 
 interface ModalConfirmProps {
   deletingDeck: Deck;
   setDeletingDeck: (deck: Deck | null) => void;
-  updateDecks: React.Dispatch<React.SetStateAction<Deck[]>>;
+  confirmD: string;
+  deleteD: string;
+  cancel: string;
 }
 
 export default function ModalConfirmDeletion({
   deletingDeck,
   setDeletingDeck,
-  updateDecks,
+  confirmD,
+  deleteD,
+  cancel,
 }: ModalConfirmProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const { mutate: deleteDeck, status } = useDeleteDeck();
+  const isLoading = status === "pending";
 
-  async function handleDelete() {
-    setIsLoading(true);
-    await axios.delete(`/api/sets/${deletingDeck._id}`);
-    toast.success("Deck and flashcards deleted");
-    setIsLoading(false);
-    updateDecks((prev) => prev.filter((deck) => deck._id !== deletingDeck._id));
-    setDeletingDeck(null);
+  function handleDelete() {
+    deleteDeck(deletingDeck._id, { onSuccess: () => setDeletingDeck(null) });
   }
 
   return (
@@ -38,22 +36,19 @@ export default function ModalConfirmDeletion({
           className="bg-white p-6 rounded shadow-lg w-full max-w-md"
           onClick={(e) => e.stopPropagation()}
         >
-          <h3 className="text-xl font-semibold mb-4 text-center">
-            Are you sure you want to delete this deck with associated
-            flashcards?
-          </h3>
+          <h3 className="text-xl font-semibold mb-4 text-center">{confirmD}</h3>
           <div className="flex justify-end gap-4">
             <button
               onClick={() => setDeletingDeck(null)}
               className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors cursor-pointer"
             >
-              Cancel
+              {cancel}
             </button>
             <button
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors cursor-pointer"
               onClick={handleDelete}
             >
-              Delete deck
+              {deleteD}
             </button>
           </div>
         </div>

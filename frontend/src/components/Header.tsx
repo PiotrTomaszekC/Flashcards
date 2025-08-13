@@ -3,9 +3,11 @@ import { FaUser } from "react-icons/fa";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import ModalConfirmLogout from "./ModalConfirmLogout";
+import { useTranslation } from "react-i18next";
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLogout, setIsLogout] = useState(false);
 
@@ -28,7 +30,7 @@ export default function Header() {
                     : "hover:text-blue-500 hover:underline max-lg:text-center"
                 }
               >
-                {["Home", "My Decks", "Add Card", "Learn"][idx]}
+                {[t("home"), t("myDecks"), t("addCard"), t("learn")][idx]}
               </NavLink>
             ))}
           </nav>
@@ -39,6 +41,18 @@ export default function Header() {
         <div className="text-xl hidden md:block ml-10">
           {user ? (
             <div className="flex gap-5 items-center max-lg:text-center">
+              <select
+                value={i18n.language}
+                onChange={(e) => i18n.changeLanguage(e.target.value)}
+                className="focus:outline-none text-2xl"
+              >
+                <option value="en">🇬🇧</option>
+                <option value="pl">🇵🇱</option>
+                <option value="es">🇪🇸</option>
+                <option value="de">🇩🇪</option>
+                <option value="fr">🇫🇷</option>
+              </select>
+
               <NavLink
                 to="/user"
                 className={({ isActive }) =>
@@ -54,7 +68,7 @@ export default function Header() {
                 className="bg-blue-600 p-2 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors cursor-pointer"
                 onClick={() => setIsLogout(true)}
               >
-                Log out
+                {t("logout")}
               </button>
             </div>
           ) : (
@@ -62,7 +76,7 @@ export default function Header() {
               to="/login"
               className="bg-blue-600 p-2 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors"
             >
-              Log in
+              {t("login")}
             </NavLink>
           )}
         </div>
@@ -89,11 +103,22 @@ export default function Header() {
                     : "hover:text-blue-500 hover:underline"
                 }
               >
-                {["Home", "My Decks", "+ Add Card", "Learn"][idx]}
+                {[t("home"), t("myDecks"), t("addCard"), t("learn")][idx]}
               </NavLink>
             ))}
             {user ? (
               <div className="flex gap-3 items-center border-t-1 border-gray-300 pt-2">
+                <select
+                  value={i18n.language}
+                  onChange={(e) => i18n.changeLanguage(e.target.value)}
+                  className="focus:outline-none text-2xl"
+                >
+                  <option value="en">🇬🇧</option>
+                  <option value="pl">🇵🇱</option>
+                  <option value="es">🇪🇸</option>
+                  <option value="de">🇩🇪</option>
+                  <option value="fr">🇫🇷</option>
+                </select>
                 <NavLink
                   to="/user"
                   onClick={() => setMenuOpen(false)}
@@ -113,7 +138,7 @@ export default function Header() {
                   }}
                   className="text-left bg-blue-600 p-2 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors"
                 >
-                  Log out
+                  {t("logout")}
                 </button>
               </div>
             ) : (
@@ -122,7 +147,7 @@ export default function Header() {
                 onClick={() => setMenuOpen(false)}
                 className="bg-blue-600 p-2 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors"
               >
-                Log in
+                {t("login")}
               </NavLink>
             )}
           </div>

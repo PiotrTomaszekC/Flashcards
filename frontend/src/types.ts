@@ -35,3 +35,10 @@ export interface StudyStats {
   lastStudyDate?: string;
   progress?: Progress[];
 }
+
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  recentDecks: string[];
+}

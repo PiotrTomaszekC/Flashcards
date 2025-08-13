@@ -2,6 +2,7 @@ import userEvent from "@testing-library/user-event";
 import { render, screen, waitFor } from "../testing-library-utils";
 import AllDecksScreen from "../../src/screens/AllDecksScreen";
 import { toast } from "react-toastify";
+import * as AuthContext from "../../src/context/authContext";
 
 globalThis.__TEST_USER_ID__ = "1";
 const user = userEvent.setup();
@@ -9,6 +10,11 @@ const user = userEvent.setup();
 describe("AllDecksScreen - user with decks", () => {
   beforeEach(() => {
     globalThis.__TEST_USER_ID__ = "1";
+    vi.spyOn(AuthContext, "useAuth").mockReturnValue({
+      user: { _id: "1", email: "user@example.com", name: "Test User" },
+      setUser: vi.fn(),
+      logout: vi.fn(),
+    });
 
     render(<AllDecksScreen />);
   });
@@ -127,7 +133,7 @@ describe("AllDecksScreen - user without decks", () => {
     const selectTargetLng = screen.getByTestId("target-language");
     const description = screen.getByPlaceholderText("Description");
     const cancelButton = screen.getByRole("button", { name: "Cancel" });
-    const submitButton = screen.getByRole("button", { name: "Create" });
+    const submitButton = screen.getByRole("button", { name: "Create a Deck" });
     expect(nameInput).toBeInTheDocument();
     expect(selectSourceLng).toBeInTheDocument();
     expect(selectTargetLng).toBeInTheDocument();
@@ -150,7 +156,7 @@ describe("AllDecksScreen - user without decks", () => {
     const selectSourceLng = screen.getByTestId("source-language");
     const selectTargetLng = screen.getByTestId("target-language");
     const description = screen.getByPlaceholderText("Description");
-    const submitButton = screen.getByRole("button", { name: "Create" });
+    const submitButton = screen.getByRole("button", { name: "Save" });
     await user.type(nameInput, "Animals");
     await user.selectOptions(selectSourceLng, "English");
     await user.selectOptions(selectTargetLng, "Polish");

@@ -53,21 +53,21 @@ describe("Typing into form inputs", () => {
     await user.type(nameInput, "example user");
     await user.clear(emailInput);
     await user.type(emailInput, "user@example.com");
-    await user.type(passwordInput, "123456");
-    await user.type(confirmPasswordInput, "123456");
+    await user.type(passwordInput, "Mx123456");
+    await user.type(confirmPasswordInput, "Mx123456");
     await user.click(submitButton);
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 });
 
 describe("Submitting the form", () => {
-  test("correctly shows success toast notification and clears password fields", async () => {
+  test("correctly shows success toast notification", async () => {
     await user.clear(nameInput);
     await user.type(nameInput, "example user");
     await user.clear(emailInput);
     await user.type(emailInput, "user@example.com");
-    await user.type(passwordInput, "123456");
-    await user.type(confirmPasswordInput, "123456");
+    await user.type(passwordInput, "Mx123456");
+    await user.type(confirmPasswordInput, "Mx123456");
     await user.click(submitButton);
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith("User profile updated!");
@@ -76,23 +76,30 @@ describe("Submitting the form", () => {
       expect(screen.queryByRole("status")).not.toBeInTheDocument();
     });
     //the form is re-rendered after the loader disappears so we need to select the elements again
-    expect(screen.getByLabelText("New Password")).toHaveValue("");
-    expect(screen.getByLabelText("Confirm New Password")).toHaveValue("");
+    expect(screen.getByLabelText("New Password")).toHaveValue("Mx123456");
+    expect(screen.getByLabelText("Confirm New Password")).toHaveValue(
+      "Mx123456"
+    );
   });
-  test("with different passwords makes the button disabled", async () => {
+  test("with different passwords renders error messages", async () => {
     await user.clear(nameInput);
     await user.type(nameInput, "example user");
     await user.clear(emailInput);
     await user.type(emailInput, "user@example.com");
     await user.type(passwordInput, "123456");
     await user.type(confirmPasswordInput, "123333");
-    expect(submitButton).toBeDisabled();
+    await user.click(submitButton);
+    expect(
+      screen.getByText(
+        "Password must have at least 8 characters, contain an uppercase letter and a number"
+      )
+    ).toBeInTheDocument();
   });
-  test("with the same data makes the button disabled", async () => {
+  test("with the same data as before makes the button disabled", async () => {
     await user.clear(nameInput);
     await user.type(nameInput, "Test User");
     await user.clear(emailInput);
     await user.type(emailInput, "user@example.com");
-    expect(submitButton).toBeDisabled();
+    expect(submitButton).toHaveAttribute("aria-disabled", "true");
   });
 });

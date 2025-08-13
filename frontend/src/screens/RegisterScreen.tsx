@@ -1,20 +1,22 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { AxiosError } from "axios";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import Loader from "../components/Loader";
 import { useAuth } from "../context/authContext";
+import { useRegister } from "../hooks/useUsers";
 import {
   userRegisterSchema,
   type UserRegisterFormData,
 } from "../validation/userSchemas";
+import { useTranslation } from "react-i18next";
 
 export default function RegisterScreen() {
   const { user, setUser } = useAuth();
+  const { mutate: registerUser, status } = useRegister(setUser);
+  const isLoading = status === "pending";
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(
     function () {
@@ -33,44 +35,23 @@ export default function RegisterScreen() {
     resolver: zodResolver(userRegisterSchema),
   });
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  async function onSubmit(data: UserRegisterFormData) {
-    try {
-      setIsLoading(true);
-      const { data: createdUser } = await axios.post(
-        "/api/users",
-        { name: data.name, email: data.email, password: data.password },
-        { withCredentials: true }
-        //this tells axios to include cookies
-      );
-      setUser(createdUser);
-      localStorage.setItem("userInfo", JSON.stringify(createdUser));
-      //we update both user React state (in context) and local storage. First allows to immediately update the UI based on the new user data but it only runs in memory while the app is running. Local storage persists the user data across page reloads
-      toast.success("User successfully registered");
-      navigate("/");
-    } catch (error) {
-      const err = error as AxiosError<{ message: string }>;
-      //we need to use AxiosError type, otherwise TS complains
-      const message =
-        err.response?.data?.message || "Invalid name, email or password";
-      toast.error(message);
-    } finally {
-      setIsLoading(false);
-    }
+  function onSubmit(data: UserRegisterFormData) {
+    registerUser(data, { onSuccess: () => navigate("/") });
   }
 
   return (
     <>
       <div className="flex flex-col gap-4 items-center">
-        <h2 className="uppercase text-4xl font-semibold">Register new user</h2>
+        <h2 className="uppercase text-4xl font-semibold">
+          {t("registerUser")}
+        </h2>
         <form
           className="w-full sm:w-[70%] lg:w-1/3 p-6 bg-white shadow-md rounded flex flex-col items-center justify-center text-2xl gap-10"
           onSubmit={handleSubmit(onSubmit)}
         >
           {/* Name */}
           <div className="flex flex-col items-center gap-3 w-full lg:w-2/3">
-            <label htmlFor="name">Name</label>{" "}
+            <label htmlFor="name">{t("name")}</label>{" "}
             <input
               type="text"
               className="border-blue-400 border rounded-md w-full p-2 focus:outline-2 focus:outline-blue-500 outline-offset-[-1px]"
@@ -78,7 +59,7 @@ export default function RegisterScreen() {
               {...register("name")}
             />
             {errors?.name?.message && (
-              <p className="text-red-600 text-base">{errors.name.message}</p>
+              <p className="text-red-600 text-base">{t(errors.name.message)}</p>
             )}
           </div>
 
@@ -92,13 +73,15 @@ export default function RegisterScreen() {
               {...register("email")}
             />
             {errors?.email?.message && (
-              <p className="text-red-600 text-base">{errors.email.message}</p>
+              <p className="text-red-600 text-base">
+                {t(errors.email.message)}
+              </p>
             )}
           </div>
 
           {/* Password */}
           <div className="flex flex-col items-center gap-3 w-full lg:w-2/3">
-            <label htmlFor="password">Password</label>{" "}
+            <label htmlFor="password">{t("password")}</label>{" "}
             <input
               type="password"
               className="border-blue-400 border rounded-md w-full p-2 focus:outline-2 focus:outline-blue-500 outline-offset-[-1px]"
@@ -107,14 +90,14 @@ export default function RegisterScreen() {
             />
             {errors?.password?.message && (
               <p className="text-red-600 text-base">
-                {errors.password.message}
+                {t(errors.password.message)}
               </p>
             )}
           </div>
 
           {/* Confirm password */}
           <div className="flex flex-col items-center gap-3 w-full lg:w-2/3">
-            <label htmlFor="confirmPassword">Confirm Password</label>{" "}
+            <label htmlFor="confirmPassword">{t("confirmPassword")}</label>{" "}
             <input
               type="password"
               className="border-blue-400 border rounded-md w-full p-2 focus:outline-2 focus:outline-blue-500 outline-offset-[-1px]"
@@ -123,7 +106,7 @@ export default function RegisterScreen() {
             />
             {errors?.confirmPassword?.message && (
               <p className="text-red-600 text-base">
-                {errors.confirmPassword.message}
+                {t(errors.confirmPassword.message)}
               </p>
             )}
           </div>
@@ -136,16 +119,16 @@ export default function RegisterScreen() {
                 type="submit"
                 className="bg-blue-600 py-2 px-5 rounded-md hover:bg-blue-700 text-white font-semibold transition-colors"
               >
-                Register
+                {t("register")}
               </button>
             )}
           </div>
         </form>
         <div className="text-lg text-center">
-          Already registered user?
+          {t("alreadyRegistered")}
           <br />
           <Link to="/login" className="hover:text-blue-400 underline w-full">
-            Log in →
+            {t("login")} →
           </Link>
         </div>
       </div>

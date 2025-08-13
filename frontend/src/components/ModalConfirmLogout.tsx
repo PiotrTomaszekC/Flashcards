@@ -1,7 +1,7 @@
-import axios from "axios";
-import { useState } from "react";
 import { toast } from "react-toastify";
+import { useLogout } from "../hooks/useUsers";
 import Loader from "./Loader";
+import { useTranslation } from "react-i18next";
 
 interface ModalConfirmLogoutProps {
   logout: () => void;
@@ -12,16 +12,19 @@ export default function ModalConfirmLogout({
   logout,
   setIsLogout,
 }: ModalConfirmLogoutProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const { mutate: logoutUser, status } = useLogout();
+  const { t } = useTranslation();
 
-  async function handleLogout() {
-    setIsLoading(true);
-    await axios.post("/api/users/logout", {}, { withCredentials: true });
-    //add { withCredentials: true } for safety when later the site is deployed to render etc.
-    logout();
-    setIsLoading(false);
-    toast.success("User logged out");
-    setIsLogout(false);
+  const isLoading = status === "pending";
+
+  function handleLogout() {
+    logoutUser(undefined, {
+      onSuccess: () => {
+        logout();
+        toast.success(t("toasts.loggedOut"));
+        setIsLogout(false);
+      },
+    });
   }
 
   return (
@@ -37,20 +40,20 @@ export default function ModalConfirmLogout({
           onClick={(e) => e.stopPropagation()}
         >
           <h3 className="text-xl font-semibold mb-4 text-center">
-            Are you sure you want to log out?
+            {t("confirmLogout")}
           </h3>
           <div className="flex justify-end gap-4">
             <button
               onClick={() => setIsLogout(false)}
               className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors cursor-pointer"
             >
-              Cancel
+              {t("cancel")}
             </button>
             <button
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors cursor-pointer"
               onClick={handleLogout}
             >
-              Log out
+              {t("logout")}
             </button>
           </div>
         </div>

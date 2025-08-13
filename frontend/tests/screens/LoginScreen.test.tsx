@@ -30,7 +30,7 @@ beforeEach(() => {
 });
 
 test("Display heading, inputs and button", () => {
-  expect(screen.getByRole("heading", { name: "Login" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Log in" })).toBeInTheDocument();
   expect(emailInput).toBeInTheDocument();
   expect(passwordInput).toBeInTheDocument();
   expect(loginButton).toBeInTheDocument();

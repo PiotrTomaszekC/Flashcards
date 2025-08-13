@@ -3,12 +3,12 @@ import { z } from "zod";
 export const deckSchema = z.object({
   name: z
     .string()
-    .nonempty("Deck name is required")
+    .nonempty("errors.deckNameRequired")
     .refine((val) => val.trim().length > 0, {
-      message: "Deck name cannot be just spaces",
+      message: "errors.deckNameNotSpaces",
     }),
-  sourceLng: z.string().nonempty("Source language is required"),
-  targetLng: z.string().nonempty("Target language is required"),
+  sourceLng: z.string().nonempty("errors.srcLngRequired"),
+  targetLng: z.string().nonempty("errors.trgLngRequired"),
   description: z.string().optional(),
 });
 

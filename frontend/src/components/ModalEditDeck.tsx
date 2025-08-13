@@ -1,24 +1,24 @@
-import axios from "axios";
-import { useState } from "react";
-import type { Deck } from "../types";
-import Loader from "./Loader";
-import LANGUAGES from "../constants";
-import { toast } from "react-toastify";
-import DeckForm from "./DeckForm";
-import { useForm } from "react-hook-form";
-import { deckSchema, type DeckFormData } from "../validation/deckSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import LANGUAGES from "../constants";
+import { useEditDeck } from "../hooks/useDecks";
+import type { Deck } from "../types";
+import { deckSchema, type DeckFormData } from "../validation/deckSchemas";
+import DeckForm from "./DeckForm";
+import Loader from "./Loader";
 
 interface ModalEditDeckProps {
   editingDeck: Deck;
   setEditingDeck: (deck: Deck | null) => void;
-  updateDecks: React.Dispatch<React.SetStateAction<Deck[]>>;
+  editDeckS: string;
+  save: string;
 }
 
 export default function ModalEditDeck({
   setEditingDeck,
   editingDeck,
-  updateDecks,
+  editDeckS,
+  save,
 }: ModalEditDeckProps) {
   const {
     register,
@@ -33,33 +33,24 @@ export default function ModalEditDeck({
     },
     resolver: zodResolver(deckSchema),
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const { mutate: editDeck, status } = useEditDeck();
+  const isLoading = status === "pending";
 
-  async function onSubmit(data: DeckFormData) {
-    setIsLoading(true);
+  function onSubmit(data: DeckFormData) {
     const sourceLanguage = LANGUAGES.find(
       (lang) => lang.name === data.sourceLng
     )!;
     const targetLanguage = LANGUAGES.find(
       (lang) => lang.name === data.targetLng
     )!;
-    const { data: updatedDeck } = await axios.put(
-      `/api/sets/${editingDeck._id}`,
-      {
-        name: data.name,
-        description: data.description,
-        sourceLanguage,
-        targetLanguage,
-      }
-    );
-    setIsLoading(false);
-    updateDecks((prevDecks) =>
-      prevDecks.map((deck) =>
-        deck._id === updatedDeck._id ? updatedDeck : deck
-      )
-    );
-    setEditingDeck(null);
-    toast.success("Deck edited successfully");
+    const passedInData = {
+      deckId: editingDeck._id,
+      name: data.name,
+      description: data.description,
+      sourceLanguage,
+      targetLanguage,
+    };
+    editDeck(passedInData, { onSuccess: () => setEditingDeck(null) });
   }
 
   function onClose() {
@@ -78,14 +69,14 @@ export default function ModalEditDeck({
           className="bg-white p-6 rounded shadow-lg w-full max-w-md"
           onClick={(e) => e.stopPropagation()}
         >
-          <h2 className="text-xl font-bold mb-4">Edit Deck</h2>
+          <h2 className="text-xl font-bold mb-4">{editDeckS}</h2>
           <DeckForm
             handleSubmit={handleSubmit}
             onSubmit={onSubmit}
             register={register}
             errors={errors}
             onClose={onClose}
-            buttonLabel="Save"
+            buttonLabel={save}
           />
         </div>
       )}

@@ -3,12 +3,15 @@ import { IoMdDownload } from "react-icons/io";
 import { Link } from "react-router-dom";
 import type { Deck, Flashcard } from "../types";
 import axios from "axios";
+import { useExportDeckCSV } from "../hooks/useDecks";
+import { useTranslation } from "react-i18next";
 
 interface DeckComponentProps {
   deck: Deck;
   flashcards: Flashcard[];
   setEditingDeck: (deck: Deck | null) => void;
   setDeletingDeck: (deck: Deck | null) => void;
+  learn: string;
 }
 
 export default function DeckComponent({
@@ -16,23 +19,13 @@ export default function DeckComponent({
   flashcards,
   setEditingDeck,
   setDeletingDeck,
+  learn,
 }: DeckComponentProps) {
-  async function handleExportCSV(deckId: string, deckName: string) {
-    try {
-      const { data } = await axios.get(`/api/sets/${deckId}/export-csv`, {
-        responseType: "blob", //Tells axios to expect binary data (not JSON or text)
-      });
-      const blob = new Blob([data], { type: "text/csv" }); //Wraps the CSV data in a Blob object.
-      const url = window.URL.createObjectURL(blob); //Creates a temporary URL pointing to that blob so it can be downloaded.
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${deckName}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove(); //Creates a hidden <a> tag, sets its href to the blob URL and download attribute to the desired filename, appends it to the DOM, clicks it programmatically, and removes it.
-    } catch (error) {
-      console.error("Error exporting CSV:", error);
-    }
+  const { mutate: exportDeck } = useExportDeckCSV();
+  const { t } = useTranslation();
+
+  function handleExportCSV() {
+    exportDeck({ deckId: deck._id, deckName: deck.name });
   }
 
   async function saveToRecentDecks(deckId: string) {
@@ -48,9 +41,9 @@ export default function DeckComponent({
 
       <p className="text-center text-lg mb-2">
         <span className="mr-2">{deck.sourceLanguage.flag}</span>
-        {deck.sourceLanguage.name} →
+        {t(`languagesO.${deck.sourceLanguage.name}`)} →
         <span className="ml-2 mr-2">{deck.targetLanguage.flag}</span>
-        {deck.targetLanguage.name}
+        {t(`languagesO.${deck.targetLanguage.name}`)}
       </p>
 
       <p className="text-center text-lg mb-2">{deck.description}</p>
@@ -63,7 +56,7 @@ export default function DeckComponent({
         {flashcards.length && (
           <button
             className="bg-transparent hover:bg-blue-200 p-2 rounded transition-colors cursor-pointer text-xl"
-            onClick={() => handleExportCSV(deck._id, deck.name)}
+            onClick={handleExportCSV}
           >
             <IoMdDownload />
           </button>
@@ -88,7 +81,6 @@ export default function DeckComponent({
         <button
           data-testid={`delete-deck-${deck._id}`}
           className=" bg-transparent hover:bg-blue-200 p-2 rounded transition-colors cursor-pointer text-xl"
-          // onClick={() => handleDelete(deck._id)}
           onClick={() => setDeletingDeck(deck)}
         >
           <FaTrash />
@@ -99,7 +91,7 @@ export default function DeckComponent({
           onClick={() => saveToRecentDecks(deck._id)}
           className="bg-blue-500 px-3 py-2 rounded-md hover:bg-blue-600 transition-colors text-white font-semibold text-xl text-center"
         >
-          Learn
+          {learn}
         </Link>
       </div>
     </div>

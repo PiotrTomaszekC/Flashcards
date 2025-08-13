@@ -5,6 +5,7 @@ import type {
 } from "react-hook-form";
 import LANGUAGES from "../constants";
 import type { DeckFormData } from "../validation/deckSchemas";
+import { useTranslation } from "react-i18next";
 
 interface DeckFormProps {
   handleSubmit: UseFormHandleSubmit<DeckFormData>;
@@ -23,17 +24,19 @@ export default function DeckForm({
   onClose,
   buttonLabel,
 }: DeckFormProps) {
+  const { t } = useTranslation();
+
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
       <input
         type="text"
         id="name"
         className="p-2 border-blue-400 border rounded-md focus:outline-2 focus:outline-blue-500 outline-offset-[-1px]"
-        placeholder="Deck Name"
+        placeholder={t("deckName")}
         {...register("name")}
       />
       {errors?.name?.message && (
-        <p className="text-red-600 text-base">{errors.name.message}</p>
+        <p className="text-red-600 text-base">{t(errors.name.message)}</p>
       )}
 
       <select
@@ -44,7 +47,7 @@ export default function DeckForm({
       >
         {LANGUAGES.map((lang) => (
           <option key={lang.name} value={lang.name}>
-            {lang.flag} {lang.name}
+            {lang.flag} {t(`languagesO.${lang.name}`)}
           </option>
         ))}
       </select>
@@ -57,7 +60,7 @@ export default function DeckForm({
       >
         {LANGUAGES.map((lang) => (
           <option key={lang.name} value={lang.name}>
-            {lang.flag} {lang.name}
+            {lang.flag} {t(`languagesO.${lang.name}`)}
           </option>
         ))}
       </select>
@@ -66,7 +69,7 @@ export default function DeckForm({
         id="description"
         {...register("description")}
         className="p-2 border-blue-400 border rounded-md focus:outline-2 focus:outline-blue-500 outline-offset-[-1px]"
-        placeholder="Description"
+        placeholder={t("description")}
       />
       <div className="flex justify-end gap-2">
         <button
@@ -74,7 +77,7 @@ export default function DeckForm({
           onClick={onClose}
           className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors cursor-pointer"
         >
-          Cancel
+          {t("cancel")}
         </button>
         <button
           type="submit"

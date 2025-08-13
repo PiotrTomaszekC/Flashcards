@@ -1,64 +1,64 @@
-import axios from "axios";
+import { useState } from "react";
 import { FaAward } from "react-icons/fa";
 import { GiProgression } from "react-icons/gi";
 import { RiProgress5Line } from "react-icons/ri";
+import { useAuth } from "../context/authContext";
+import { useUpdateDailyGoal } from "../hooks/useStudyStats";
 import type { StudyStats } from "../types";
 
 interface GoalAndStreakProps {
   studyStats: StudyStats | null;
   dailyGoal: number;
-  setDailyGoal: (value: number) => void;
+  studyGoal: string;
+  dailyGoalS: string;
+  repetitionsToday: string;
+  currentStreak: string;
+  day: string;
 }
 
 export default function GoalAndStreak({
   studyStats,
   dailyGoal,
-  setDailyGoal,
+  studyGoal,
+  dailyGoalS,
+  repetitionsToday,
+  currentStreak,
+  day,
 }: GoalAndStreakProps) {
+  const { user } = useAuth();
+  const [currentDailyGoal, setCurrentDailyGoal] = useState(dailyGoal || 20);
   const today = new Date().toISOString().split("T")[0];
   const progressToday =
     studyStats?.progress?.find((p) => p.date === today) || null;
 
-  async function handleDailyGoal(goal: number) {
-    setDailyGoal(goal);
-    if (studyStats) {
-      await axios.put("/api/studyStats", { dailyGoal: goal });
-    }
+  const { mutate: updateDailyGoal } = useUpdateDailyGoal();
+
+  function onGoalUpdate(goal: number) {
+    setCurrentDailyGoal(goal);
+    if (user) updateDailyGoal(goal);
   }
 
   return (
     <div className="bg-blue-100 py-2 rounded-md w-full lg:w-4/5 px-8 font-semibold">
-      <h2 className="uppercase text-2xl text-blue-700 font-bold">Study goal</h2>
+      <h2 className="uppercase text-2xl text-blue-700 font-bold">
+        {studyGoal}
+      </h2>
       <div className="flex flex-col sm:flex-row gap-4 lg:gap-10 mt-4">
         <div className="bg-white rounded-md px-4 py-2 flex max-lg:flex-col gap-2 items-center text-xl">
-          <span className="max-lg:text-center">
-            Daily Goal (cards reviewed per day):
-          </span>
-          <div className="flex gap-1 ">
-            <button
-              onClick={() => handleDailyGoal(20)}
-              className={`${
-                dailyGoal === 20 && "bg-blue-600 text-white"
-              } hover:bg-blue-600 hover:text-white transition-colors rounded-md px-2 py-1 cursor-pointer`}
-            >
-              20
-            </button>
-            <button
-              onClick={() => handleDailyGoal(50)}
-              className={`${
-                dailyGoal === 50 && "bg-blue-600 text-white"
-              } hover:bg-blue-600 hover:text-white transition-colors rounded-md px-2 py-1 cursor-pointer`}
-            >
-              50
-            </button>
-            <button
-              onClick={() => handleDailyGoal(100)}
-              className={`${
-                dailyGoal === 100 && "bg-blue-600 text-white"
-              } hover:bg-blue-600 hover:text-white transition-colors rounded-md px-2 py-1 cursor-pointer`}
-            >
-              100
-            </button>
+          <span className="max-lg:text-center">{dailyGoalS}</span>
+
+          <div className="flex gap-1">
+            {[20, 50, 100].map((goal) => (
+              <button
+                key={goal}
+                onClick={() => onGoalUpdate(goal)}
+                className={`${
+                  currentDailyGoal === goal && "bg-blue-600 text-white"
+                } hover:bg-blue-600 hover:text-white transition-colors rounded-md px-2 py-1 cursor-pointer`}
+              >
+                {goal}
+              </button>
+            ))}
           </div>
         </div>
         <div
@@ -75,8 +75,8 @@ export default function GoalAndStreak({
           )}
 
           <span>
-            {progressToday ? progressToday.repetitions : 0} Repetition
-            {progressToday?.repetitions === 1 ? "" : "s"} Today
+            {progressToday ? progressToday.repetitions : 0} {repetitionsToday}
+            {/* {progressToday?.repetitions === 1 ? "" : "s"} Today */}
           </span>
         </div>
         <div
@@ -84,8 +84,8 @@ export default function GoalAndStreak({
         >
           <GiProgression className="text-4xl" />
           <span>
-            Current Streak: {studyStats ? studyStats.studyStreak : 0} Day
-            {studyStats && studyStats.studyStreak === 1 ? "" : "s"}
+            {currentStreak} {studyStats ? studyStats.studyStreak : 0} {day}
+            {/* {studyStats && studyStats.studyStreak === 1 ? "" : "s"} */}
           </span>
         </div>
       </div>

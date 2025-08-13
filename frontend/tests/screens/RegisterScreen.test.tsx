@@ -59,8 +59,8 @@ describe("Form behavior", () => {
   test("Shows loader on form submit", async () => {
     await user.type(nameInput, "example user");
     await user.type(emailInput, "user@example.com");
-    await user.type(passwordInput, "123456");
-    await user.type(confirmPasswordInput, "123456");
+    await user.type(passwordInput, "Mx123456");
+    await user.type(confirmPasswordInput, "Mx123456");
     await user.click(registerButton);
     expect(await screen.findByRole("status")).toBeInTheDocument();
   });
@@ -78,22 +78,20 @@ test("Redirects if user is already logged in", () => {
 });
 
 describe("Form submission results", () => {
-  test("Different passwords submitted shows error toast", async () => {
+  test("Form errors show error notifications", async () => {
     await user.type(nameInput, "example user");
     await user.type(emailInput, "user@example.com");
-    await user.type(passwordInput, "123456");
+    await user.type(passwordInput, "Mx123456");
     await user.type(confirmPasswordInput, "123");
     await user.click(registerButton);
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Passwords do not match");
-    });
+    expect(screen.getByText("Passwords do not match")).toBeInTheDocument();
   });
 
   test("Redirects after successfull registration", async () => {
     await user.type(nameInput, "example user");
     await user.type(emailInput, "user@example.com");
-    await user.type(passwordInput, "123456");
-    await user.type(confirmPasswordInput, "123456");
+    await user.type(passwordInput, "Mx123456");
+    await user.type(confirmPasswordInput, "Mx123456");
     await user.click(registerButton);
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith("/");
@@ -103,8 +101,8 @@ describe("Form submission results", () => {
   test("Shows error toast when email is already taken", async () => {
     await user.type(nameInput, "taken user");
     await user.type(emailInput, "taken@example.com");
-    await user.type(passwordInput, "123456");
-    await user.type(confirmPasswordInput, "123456");
+    await user.type(passwordInput, "Mx123456");
+    await user.type(confirmPasswordInput, "Mx123456");
     await user.click(registerButton);
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith("Email already in use");

@@ -1,20 +1,15 @@
 import { z } from "zod";
 
-// Base schema shared between forms
 const baseUserSchema = z.object({
   name: z
     .string()
-    .min(4, "Username must have at least 4 letters")
-    .nonempty("That field is required"),
-  email: z
-    .string()
-    .email("Please enter a valid email address")
-    .nonempty("That field is required"),
+    .min(4, "errors.usernameTooShort")
+    .nonempty("errors.required"),
+  email: z.string().email("errors.invalidEmail").nonempty("errors.required"),
   password: z.string(),
   confirmPassword: z.string(),
 });
 
-// Schema for profile update (password optional) - cant use .min or .regex because those would run even when the value is undefined
 export const userProfileSchema = baseUserSchema
   .extend({
     password: z
@@ -26,27 +21,27 @@ export const userProfileSchema = baseUserSchema
           val === "" ||
           (val.length >= 8 && /[A-Z]/.test(val) && /\d/.test(val)),
         {
-          message:
-            "Password must have at least 8 characters, contain an uppercase letter and a number",
+          message: "errors.passwordComplexity",
         }
       ),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "errors.passwordsDontMatch",
     path: ["confirmPassword"],
   });
 
 // Schema for registration (password required)
+
 export const userRegisterSchema = baseUserSchema
   .extend({
     password: z
       .string()
-      .min(8, "Password must have at least 8 characters")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/\d/, "Password must contain at least one number"),
+      .min(8, "errors.passwordTooShort")
+      .regex(/[A-Z]/, "errors.passwordUppercase")
+      .regex(/\d/, "errors.passwordNumber"),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: "errors.passwordsDontMatch",
     path: ["confirmPassword"],
   });
 

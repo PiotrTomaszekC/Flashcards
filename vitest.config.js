@@ -9,7 +9,7 @@ export default defineConfig({
     coverage: {
       provider: "v8", // or 'c8' if you prefer
       reporter: ["text", "html", "lcov"],
-      exclude: ["frontend/**"],
+      exclude: ["frontend/**", "vitest.config.js", "backend/config/db.js"],
     },
   },
 });

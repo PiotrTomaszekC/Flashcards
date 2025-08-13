@@ -1,17 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
-import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { toast } from "react-toastify";
 import Loader from "../components/Loader";
 import { useAuth } from "../context/authContext";
+import { useUpdateUser } from "../hooks/useUsers";
 import {
   userProfileSchema,
   type UserProfileFormData,
 } from "../validation/userSchemas";
+import { useTranslation } from "react-i18next";
 
 export default function UserProfileScreen() {
   const { user, setUser } = useAuth();
+  const { mutate: updateUser, status } = useUpdateUser(setUser);
+  const isUpdating = status === "pending";
+  const { t } = useTranslation();
 
   const initialValues = {
     name: user!.name,
@@ -30,28 +32,9 @@ export default function UserProfileScreen() {
     resolver: zodResolver(userProfileSchema),
   });
   const watchedValues = useWatch({ control });
-  const [isUpdating, setIsUpdating] = useState(false);
 
-  async function onSubmit(data: UserProfileFormData) {
-    setIsUpdating(true);
-    try {
-      const { data: updatedUser } = await axios.put("/api/users/profile", {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-      });
-      setUser(updatedUser);
-      localStorage.setItem("userInfo", JSON.stringify(updatedUser));
-      toast.success("User profile updated!");
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || "Update failed");
-      } else {
-        toast.error("An unexpected error occurred");
-      }
-    } finally {
-      setIsUpdating(false);
-    }
+  function onSubmit(data: UserProfileFormData) {
+    updateUser(data);
   }
 
   const isFormUnchanged =
@@ -71,7 +54,7 @@ export default function UserProfileScreen() {
   return (
     <div className="flex flex-col gap-4 items-center">
       <h1 className="uppercase text-4xl font-semibold max-sm:text-center">
-        Update User Profile
+        {t("updateProfile")}
       </h1>
 
       <form
@@ -80,7 +63,7 @@ export default function UserProfileScreen() {
       >
         {/* Name */}
         <div className="flex flex-col items-start gap-1 w-full">
-          <label htmlFor="name">Name</label>
+          <label htmlFor="name">{t("name")}</label>
           <input
             id="name"
             type="text"
@@ -88,7 +71,7 @@ export default function UserProfileScreen() {
             {...register("name")}
           />
           {errors?.name?.message && (
-            <p className="text-red-600 text-base">{errors.name.message}</p>
+            <p className="text-red-600 text-base">{t(errors.name.message)}</p>
           )}
         </div>
 
@@ -102,13 +85,13 @@ export default function UserProfileScreen() {
             {...register("email")}
           />
           {errors?.email?.message && (
-            <p className="text-red-600 text-base">{errors.email.message}</p>
+            <p className="text-red-600 text-base">{t(errors.email.message)}</p>
           )}
         </div>
 
         {/* Password */}
         <div className="flex flex-col items-start gap-1 w-full">
-          <label htmlFor="password">New Password</label>
+          <label htmlFor="password">{t("newPassword")}</label>
           <input
             id="password"
             type="password"
@@ -116,13 +99,15 @@ export default function UserProfileScreen() {
             {...register("password")}
           />
           {errors?.password?.message && (
-            <p className="text-red-600 text-base">{errors.password.message}</p>
+            <p className="text-red-600 text-base">
+              {t(errors.password.message)}
+            </p>
           )}
         </div>
 
         {/* Confirm password */}
         <div className="flex flex-col items-start gap-1 w-full">
-          <label htmlFor="confirmPassword">Confirm New Password</label>
+          <label htmlFor="confirmPassword">{t("confirmNewPassword")}</label>
           <input
             id="confirmPassword"
             type="password"
@@ -131,7 +116,7 @@ export default function UserProfileScreen() {
           />
           {errors?.confirmPassword?.message && (
             <p className="text-red-600 text-base">
-              {errors.confirmPassword.message}
+              {t(errors.confirmPassword.message)}
             </p>
           )}
         </div>
@@ -151,7 +136,7 @@ export default function UserProfileScreen() {
               : "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
           }`}
         >
-          Update profile
+          {t("updateProfileB")}
         </button>
       </form>
     </div>

@@ -3,17 +3,17 @@ import { z } from "zod";
 export const cardSchema = z.object({
   word: z
     .string()
-    .nonempty("Word is required")
+    .nonempty("errors.wordRequired")
     .refine((val) => val.trim().length > 0, {
-      message: "Word cannot be just spaces",
+      message: "errors.wordNotSpaces",
     }),
   translation: z
     .string()
-    .nonempty("Translation is required")
+    .nonempty("errors.translationRequired")
     .refine((val) => val.trim().length > 0, {
-      message: "Translation cannot be just spaces",
+      message: "errors.translationNotSpaces",
     }),
-  deckId: z.string().nonempty("Deck is required"),
+  deckId: z.string().nonempty("errors.deckRequired"),
   remember: z.boolean(),
 });
 

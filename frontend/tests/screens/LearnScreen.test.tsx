@@ -1,6 +1,7 @@
 import userEvent from "@testing-library/user-event";
 import { render, screen, waitFor } from "../testing-library-utils";
 import LearnSreen from "../../src/screens/LearnScreen";
+import * as AuthContext from "../../src/context/authContext";
 
 globalThis.__TEST_USER_ID__ = "1";
 const user = userEvent.setup();
@@ -11,6 +12,11 @@ describe("LearnScreen - user with decks", () => {
 
   beforeEach(async () => {
     globalThis.__TEST_USER_ID__ = "1";
+    vi.spyOn(AuthContext, "useAuth").mockReturnValue({
+      user: { _id: "1", email: "user@example.com", name: "Test User" },
+      setUser: vi.fn(),
+      logout: vi.fn(),
+    });
     render(<LearnSreen />);
     selectDeck = await screen.findByLabelText(
       "Choose the language pair you would like to learn:"
@@ -43,7 +49,7 @@ describe("LearnScreen - user without decks", () => {
   });
 
   test("renders link to add decks", async () => {
-    const addDeckLink = await screen.findByRole("link", { name: "Add a Deck" });
+    const addDeckLink = await screen.findByRole("link", { name: "+ Add Deck" });
     expect(addDeckLink).toHaveAttribute("href", "/decks");
   });
   test("renders loader on component render", async () => {

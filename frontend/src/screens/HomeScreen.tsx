@@ -1,17 +1,18 @@
+import { type ReactNode } from "react";
 import { BsCollectionFill } from "react-icons/bs";
-import { IoLanguage } from "react-icons/io5";
-import { FaFile } from "react-icons/fa";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaFile, FaPercent } from "react-icons/fa";
 import { FiRepeat } from "react-icons/fi";
-import { FaPercent } from "react-icons/fa";
-import { useEffect, useState, type ReactNode } from "react";
-import type { Flashcard, Deck, StudyStats } from "../types";
-import axios from "axios";
-import Loader from "../components/Loader";
 import { GoChevronRight } from "react-icons/go";
+import { IoLanguage } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import GoalAndStreak from "../components/GoalAndStreak";
-import { useAuth } from "../context/authContext";
+import Loader from "../components/Loader";
+import { useDecks } from "../hooks/useDecks";
+import { useFlashcards } from "../hooks/useFlashcards";
+import { useStudyStats } from "../hooks/useStudyStats";
+import { useUsers } from "../hooks/useUsers";
+import type { Deck } from "../types";
+import { useTranslation } from "react-i18next";
 
 interface StatProps {
   children: ReactNode;
@@ -20,63 +21,15 @@ interface StatProps {
 }
 
 export default function HomeScreen() {
-  const { user } = useAuth();
-  const [decks, setDecks] = useState<Deck[]>([]);
-  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
-  const [studyStats, setStudyStats] = useState<StudyStats | null>(null);
-  const [dailyGoal, setDailyGoal] = useState(0);
-  const [recentDecks, setRecentDecks] = useState<Deck[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: decks = [], isLoading: decksLoading } = useDecks();
+  const { data: flashcards = [], isLoading: flashcardsLoading } =
+    useFlashcards();
+  const { data: studyStats = null, isLoading: statsLoading } = useStudyStats();
+  const { data: userProfile, isLoading: userLoading } = useUsers();
+  const { t } = useTranslation();
 
-  useEffect(
-    function () {
-      async function fetchDeckCardsStats() {
-        if (!user) {
-          setDecks([]);
-          setFlashcards([]);
-          setStudyStats(null);
-          setRecentDecks([]);
-          // setDailyGoal(20);
-          setIsLoading(false);
-          return;
-        }
-
-        try {
-          const [decksRes, flashcardsRes, statsRes, userRes] =
-            await Promise.all([
-              axios.get("/api/sets"),
-              axios.get("/api/flashcards"),
-              axios.get("/api/studyStats"),
-              axios.get("/api/users/profile"),
-            ]);
-
-          const allDecks: Deck[] = decksRes.data;
-          const recentDeckIds: string[] = userRes.data.recentDecks;
-
-          const matchedRecentDecks = recentDeckIds
-            .map((id) => allDecks.find((deck) => deck._id === id))
-            .filter((deck): deck is Deck => Boolean(deck));
-
-          setDecks(decksRes.data);
-          setFlashcards(flashcardsRes.data);
-          setStudyStats(statsRes.data);
-          setRecentDecks(matchedRecentDecks);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-      fetchDeckCardsStats();
-    },
-    [user]
-  );
-
-  useEffect(() => {
-    if (studyStats) {
-      setDailyGoal(studyStats.dailyGoal);
-    }
-  }, [studyStats]);
+  const isLoading =
+    decksLoading || flashcardsLoading || statsLoading || userLoading;
 
   if (isLoading)
     return (
@@ -85,6 +38,12 @@ export default function HomeScreen() {
       </div>
     );
 
+  const recentDeckIds = userProfile?.recentDecks ?? [];
+  const recentDecks = recentDeckIds
+    .map((id) => decks.find((deck) => deck._id === id))
+    .filter((deck): deck is Deck => Boolean(deck));
+
+  const dailyGoal = studyStats?.dailyGoal ?? 0;
   const languages = [...new Set(decks.map((deck) => deck.targetLanguage.name))]
     .length;
   const remembered = flashcards.filter((card) => card.remember === true).length;
@@ -103,42 +62,45 @@ export default function HomeScreen() {
     <div className="flex flex-col gap-8 items-center">
       <div className="bg-blue-100 py-2 rounded-md w-full lg:w-4/5 px-8">
         <h2 className="uppercase text-2xl text-blue-700 font-bold">
-          Your stats
+          {t("yourStats")}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 lg:gap-x-30 gap-y-4 lg:gap-y-8 mt-4">
-          <Stat text={`${decks?.length} Sets`} color="bg-yellow-300">
+          <Stat text={`${decks.length} ${t("sets")}`} color="bg-yellow-300">
             <BsCollectionFill className="text-white text-2xl" />
           </Stat>
-          <Stat text={`${languages} Languages`} color="bg-green-400">
+          <Stat text={`${languages} ${t("languages")}`} color="bg-green-400">
             <IoLanguage className="text-white text-2xl" />
           </Stat>
-          <Stat text={`${flashcards?.length} Cards`} color="bg-blue-400">
+          <Stat text={`${flashcards.length} ${t("cards")}`} color="bg-blue-400">
             <FaFile className="text-white text-2xl" />
           </Stat>
-          <Stat text={`${remembered} Remembered`} color="bg-purple-400">
+          <Stat text={`${remembered} ${t("remembered")}`} color="bg-purple-400">
             <FaCheck className="text-white text-2xl" />
           </Stat>
-          <Stat text={`${completion}% Completion`} color="bg-orange-300">
+          <Stat
+            text={`${completion}% ${t("completion")}`}
+            color="bg-orange-300"
+          >
             <FaPercent className="text-white text-2xl" />
           </Stat>
-          <Stat text={`${repetitions} Repetitions`} color="bg-pink-400">
+          <Stat text={`${repetitions} ${t("repetitions")}`} color="bg-pink-400">
             <FiRepeat className="text-white text-2xl" />
           </Stat>
         </div>
       </div>
       <div className="bg-blue-100 py-2 rounded-md w-full lg:w-4/5 px-8">
         <h2 className="uppercase text-2xl text-blue-700 font-bold">
-          Recently studied decks
+          {t("recentlyStudied")}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-10 mt-4">
           {!recentDecks.length ? (
             <div className="bg-white rounded-md px-4 py-2 text-xl flex flex-col items-center gap-2">
-              <span>You haven't studied any decks yet.</span>
+              <span>{t("noRecentDecks")}</span>
               <Link
                 to="/decks"
                 className="text-white bg-blue-500 hover:bg-blue-600 transition-colors px-2 py-1 rounded-md"
               >
-                Go to Decks
+                {t("goToDecks")}
               </Link>
             </div>
           ) : (
@@ -151,7 +113,8 @@ export default function HomeScreen() {
                 <div className="flex flex-col items-center sm:items-start">
                   <h4 className="font-semibold text-2xl">{deck.name}</h4>
                   <p>
-                    {deck.sourceLanguage.name} → {deck.targetLanguage.name}
+                    {t(`languagesO.${deck.sourceLanguage.name}`)} →{" "}
+                    {t(`languagesO.${deck.targetLanguage.name}`)}
                   </p>
                 </div>
                 <div className="flex items-center justify-center">
@@ -165,7 +128,11 @@ export default function HomeScreen() {
       <GoalAndStreak
         studyStats={studyStats}
         dailyGoal={dailyGoal}
-        setDailyGoal={setDailyGoal}
+        studyGoal={t("studyGoal")}
+        dailyGoalS={t("dailyGoal")}
+        repetitionsToday={t("repetitionsToday")}
+        currentStreak={t("currentStreak")}
+        day={t("day")}
       />
     </div>
   );

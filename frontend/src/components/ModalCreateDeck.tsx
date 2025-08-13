@@ -1,22 +1,21 @@
-import axios from "axios";
-import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
 import LANGUAGES from "../constants";
-import type { Deck } from "../types";
+import { useCreateDeck } from "../hooks/useDecks";
+import { deckSchema, type DeckFormData } from "../validation/deckSchemas";
 import DeckForm from "./DeckForm";
 import Loader from "./Loader";
-import { deckSchema, type DeckFormData } from "../validation/deckSchemas";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 interface ModalCreateDeckProps {
   setIsCreatingDeck: (value: boolean) => void;
-  updateDecks: React.Dispatch<React.SetStateAction<Deck[]>>;
+  create: string;
+  save: string;
 }
 
 export default function ModalCreateDeck({
   setIsCreatingDeck,
-  updateDecks,
+  create,
+  save,
 }: ModalCreateDeckProps) {
   const {
     register,
@@ -29,26 +28,25 @@ export default function ModalCreateDeck({
     },
     resolver: zodResolver(deckSchema),
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const { mutate: createDeck, status } = useCreateDeck();
+  const isLoading = status === "pending";
 
-  async function onSubmit(data: DeckFormData) {
-    setIsLoading(true);
+  function onSubmit(data: DeckFormData) {
     const sourceLanguage = LANGUAGES.find(
       (lang) => lang.name === data.sourceLng
     )!;
     const targetLanguage = LANGUAGES.find(
       (lang) => lang.name === data.targetLng
     )!;
-    const { data: newDeck } = await axios.post("/api/sets", {
-      name: data.name,
-      description: data.description,
-      sourceLanguage,
-      targetLanguage,
-    });
-    setIsLoading(false);
-    updateDecks((prevDecks) => [...prevDecks, newDeck]);
-    setIsCreatingDeck(false);
-    toast.success("Deck created successfully");
+    createDeck(
+      {
+        name: data.name,
+        description: data.description,
+        sourceLanguage,
+        targetLanguage,
+      },
+      { onSuccess: () => setIsCreatingDeck(false) }
+    );
   }
 
   function onClose() {
@@ -67,14 +65,14 @@ export default function ModalCreateDeck({
           className="bg-white p-6 rounded shadow-lg w-full max-w-md"
           onClick={(e) => e.stopPropagation()}
         >
-          <h2 className="text-xl font-bold mb-4">Create new Deck</h2>
+          <h2 className="text-xl font-bold mb-4">{create}</h2>
           <DeckForm
             handleSubmit={handleSubmit}
             onSubmit={onSubmit}
             register={register}
             errors={errors}
             onClose={onClose}
-            buttonLabel="Create"
+            buttonLabel={save}
           />
         </div>
       )}

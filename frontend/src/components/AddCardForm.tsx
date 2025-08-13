@@ -1,19 +1,28 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { useForm } from "react-hook-form";
 import { FaPlus } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { useCreateFlashcard } from "../hooks/useFlashcards";
 import type { Deck } from "../types";
 import { cardSchema, type CardFormData } from "../validation/cardSchemas";
+import Loader from "./Loader";
+import { useTranslation } from "react-i18next";
 
 interface AddCardFormProps {
   decks: Deck[];
   defaultDeckId?: string;
+  word: string;
+  translation: string;
+  chooseDeck: string;
+  alreadyRemember: string;
 }
 
 export default function AddCardForm({
   decks,
   defaultDeckId,
+  word,
+  translation,
+  chooseDeck,
+  alreadyRemember,
 }: AddCardFormProps) {
   const {
     register,
@@ -26,36 +35,30 @@ export default function AddCardForm({
     },
     resolver: zodResolver(cardSchema),
   });
+  const { mutate: createFlashcard, status } = useCreateFlashcard();
+  const isLoading = status === "pending";
+  const { t } = useTranslation();
 
-  async function onSubmit(data: CardFormData) {
-    try {
-      await axios.post("/api/flashcards", {
-        set: data.deckId,
-        word: data.word,
-        translation: data.translation,
-        remember: data.remember,
-      });
-      toast.success("Card added to deck!");
-      reset();
-    } catch (error: unknown) {
-      let errorMessage = "Something went wrong. Please try again.";
-      if (axios.isAxiosError(error)) {
-        errorMessage = error.response?.data?.message || error.message;
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      toast.error(errorMessage);
-      //Axios error is the 400 response coming from backend wrapped in AxiosError
-      //error instanceof Error is the built-in JS error class
-    }
+  function onSubmit(data: CardFormData) {
+    createFlashcard(data, {
+      onSuccess: () => reset(), // Only reset here, toast is handled in the hook
+    });
   }
+
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader />
+      </div>
+    );
+
   return (
     <form
       className="w-full sm:w-[80%] lg:w-1/3 flex flex-col items-center justify-center bg-white rounded-md p-6 text-2xl gap-10 shadow-md"
       onSubmit={handleSubmit(onSubmit)}
     >
       <div className="flex flex-col items-center gap-3 w-full md:w-2/3">
-        <label htmlFor="word">Word</label>
+        <label htmlFor="word">{word}</label>
         <input
           id="word"
           type="text"
@@ -63,12 +66,12 @@ export default function AddCardForm({
           {...register("word")}
         />
         {errors?.word?.message && (
-          <p className="text-red-600 text-base">{errors.word.message}</p>
+          <p className="text-red-600 text-base">{t(errors.word.message)}</p>
         )}
       </div>
 
       <div className="flex flex-col items-center gap-3 w-full md:w-2/3">
-        <label htmlFor="translation">Translation</label>
+        <label htmlFor="translation">{translation}</label>
         <input
           id="translation"
           type="text"
@@ -76,27 +79,29 @@ export default function AddCardForm({
           {...register("translation")}
         />
         {errors?.translation?.message && (
-          <p className="text-red-600 text-base">{errors.translation.message}</p>
+          <p className="text-red-600 text-base">
+            {t(errors.translation.message)}
+          </p>
         )}
       </div>
 
       <div className="flex flex-col items-center gap-3 w-full md:w-2/3">
-        <label htmlFor="deckId">Choose Deck</label>
+        <label htmlFor="deckId">{chooseDeck}</label>
         <select
           id="deckId"
           className="border-blue-400 max-lg:appearance-none  border rounded-md w-full p-2 focus:outline-2 focus:outline-blue-500 outline-offset-[-1px]"
           {...register("deckId")}
         >
-          <option value="">Choose a deck...</option>
+          <option value="">{chooseDeck}...</option>
           {decks.map((deck) => (
             <option key={deck._id} value={deck._id}>
-              {deck.name} ({deck.sourceLanguage.name}→{deck.targetLanguage.name}
-              )
+              {deck.name} ({t(`languagesO.${deck.sourceLanguage.name}`)}→
+              {t(`languagesO.${deck.targetLanguage.name}`)})
             </option>
           ))}
         </select>
         {errors?.deckId?.message && (
-          <p className="text-red-600 text-base">{errors.deckId.message}</p>
+          <p className="text-red-600 text-base">{t(errors.deckId.message)}</p>
         )}
       </div>
 
@@ -107,7 +112,7 @@ export default function AddCardForm({
           className="w-5 h-5"
           {...register("remember")}
         />
-        <label htmlFor="remember">I already remember this word</label>
+        <label htmlFor="remember">{alreadyRemember}</label>
       </div>
 
       <button
