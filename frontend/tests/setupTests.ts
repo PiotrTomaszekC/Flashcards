@@ -137,7 +137,7 @@ vi.mock("react-i18next", async () => {
       t: TFunction;
       i18n: { language: string; changeLanguage: () => void };
     } => ({
-      t: (key: string): string => {
+      t: ((key: string): string => {
         const keys = key.split(".");
         let value: unknown = translations;
         for (const k of keys) {
@@ -148,7 +148,7 @@ vi.mock("react-i18next", async () => {
           }
         }
         return typeof value === "string" ? value : key;
-      },
+      }) as TFunction, // ✅ Cast to TFunction to satisfy type
       i18n: {
         language: "en",
         changeLanguage: vi.fn(),
