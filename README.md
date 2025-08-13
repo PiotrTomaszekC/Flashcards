@@ -33,7 +33,7 @@ A full-stack Flashcards app built with **React + TypeScript** on the frontend an
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/flashcards.git
+git clone https://github.com/PiotrTomaszekC/Flashcards.git
 cd flashcards
 
 # Install dependencies
