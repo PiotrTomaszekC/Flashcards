@@ -19,7 +19,7 @@ router
   .get(protect, getSetById)
   .put(protect, editSet)
   .delete(protect, deleteSet);
-// router.get("/:id/export-csv", protect, exportSet);
+router.get("/:id/export-csv", protect, exportSet);
 router.post("/import-csv", protect, upload.single("file"), importSet);
 
 export default router;

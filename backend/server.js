@@ -43,7 +43,6 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import express from "express";
 import path from "path";
-import { fileURLToPath } from "url";
 
 import connectDB from "./config/db.js";
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
@@ -55,10 +54,6 @@ import userRoutes from "./routes/userRoutes.js";
 dotenv.config();
 
 const port = process.env.PORT || 5000;
-
-// Required for __dirname in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -72,12 +67,15 @@ app.use("/api/users", userRoutes);
 app.use("/api/sets", setRoutes);
 app.use("/api/studyStats", studyStatsRoutes);
 
+// Required for __dirname in ES modules
+const __dirname = path.resolve();
+
 // Serve frontend in production
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  app.use(express.static(path.join(__dirname, "/frontend/dist")));
 
   app.get("*", (req, res) =>
-    res.sendFile(path.resolve(__dirname, "../frontend/dist", "index.html"))
+    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"))
   );
 } else {
   app.get("/", (req, res) => {
