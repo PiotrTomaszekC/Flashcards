@@ -50,3 +50,18 @@ npm run dev
 npm run build
 ```
 
+## 🧪 Running Tests
+```bash
+# Backend Unit Tests && Coverage Report
+npm run test:backend
+npm run test:coverage
+
+# Frontend Unit Tests && Coverage Report
+cd frontend
+npm run test
+npm run test:coverage
+```
+
+## ⚙️ Environment Variables
+
+
