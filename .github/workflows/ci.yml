@@ -10,44 +10,42 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-  env:
-    PORT: ${{ secrets.PORT }}
-    MONGO_URI: ${{ secrets.MONGO_URI }}
-    JWT_SECRET: ${{ secrets.JWT_SECRET }}
-    VITE_NODE_ENV: ${{ secrets.VITE_NODE_ENV }}
+    env:
+      PORT: ${{ secrets.PORT }}
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      VITE_NODE_ENV: ${{ secrets.VITE_NODE_ENV }}
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 18
-        cache: "npm"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: "npm"
 
-    - name: Install backend dependencies
-      run: npm install
+      - name: Install backend dependencies
+        run: npm install
 
-    - name: Install frontend dependencies
-      run: npm install --prefix frontend
+      - name: Install frontend dependencies
+        run: npm install --prefix frontend
+      - name: Build frontend
+        run: npm run build --prefix frontend
 
-    - name: Build frontend
-      run: npm run build --prefix frontend
+      - name: Run ESLint
+        working-directory: ./frontend
+        run: npm run lint
+      - name: Fix vitest permissions
+        run: chmod +x node_modules/.bin/vitest
 
-    - name: Run ESLint
-      working-directory: ./frontend
-      run: npm run lint
+      - name: Run backend tests with coverage
+        run: npm run test:coverage
 
-    - name: Fix vitest permissions
-      run: chmod +x node_modules/.bin/vitest
+      - name: Fix vitest permissions (frontend)
+        run: chmod +x frontend/node_modules/.bin/vitest
 
-    - name: Run backend tests with coverage
-      run: npm run test:coverage
-
-    - name: Fix vitest permissions (frontend)
-      run: chmod +x frontend/node_modules/.bin/vitest
-
-    - name: Run frontend tests with coverage
-      working-directory: ./frontend
-      run: npm run test:coverage
+      - name: Run frontend tests with coverage
+        working-directory: ./frontend
+        run: npm run test:coverage
