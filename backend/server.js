@@ -31,22 +31,22 @@ app.use("/api/sets", setRoutes);
 app.use("/api/studyStats", studyStatsRoutes);
 
 //This is new
-const __dirname = path.resolve();
+// const __dirname = path.resolve();
 
 app.use(notFound);
 app.use(errorHandler);
 
 //this is new
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "frontend/dist")));
-  app.get("*", (req, res) =>
-    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"))
-  );
-} else {
-  app.get("/", (req, res) => {
-    res.send("API is running...");
-  });
-}
+// if (process.env.NODE_ENV === "production") {
+//   app.use(express.static(path.join(__dirname, "/frontend/dist")));
+//   app.get("*", (req, res) =>
+//     res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"))
+//   );
+// } else {
+//   app.get("/", (req, res) => {
+//     res.send("API is running...");
+//   });
+// }
 
 if (process.env.NODE_ENV !== "test") {
   connectDB();
