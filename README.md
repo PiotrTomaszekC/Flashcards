@@ -39,4 +39,14 @@ cd flashcards
 # Install dependencies
 npm install
 npm install --prefix frontend
+```
+
+## 🔧 Running the App
+```bash
+# Development Mode
+npm run dev
+
+#Production Build
+npm run build
+```
 
